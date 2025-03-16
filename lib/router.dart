@@ -112,7 +112,6 @@ class _MainWrapperState extends State<MainWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
       body: widget.navigationShell,
       bottomNavigationBar: _buildNavigations(),
     );
@@ -148,18 +147,6 @@ class _MainWrapperState extends State<MainWrapper> {
           });
           _selectNavigation(index);
         },
-      );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-        title: Text("Amber Road", style: TextStyle(color: colPrimary),),
-        shape: Border(
-          bottom: BorderSide(
-            color: colSpecial,
-            width: 2,
-          )
-        ),
       );
   }
 }
