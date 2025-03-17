@@ -98,6 +98,7 @@ class CoverView extends StatelessWidget {
       padding: EdgeInsets.only(right: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
 
         children: [
           ClipRRect(
@@ -110,14 +111,16 @@ class CoverView extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          Text(name, style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: colPrimary,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          
+          SizedBox(
+            width: 112,
+            child: Text(name, style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: colPrimary,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       )

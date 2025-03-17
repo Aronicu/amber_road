@@ -1,3 +1,4 @@
+import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/widgets/book_view.dart';
@@ -21,16 +22,6 @@ class StorePage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final Book book = Book(
-      Image.asset("assets/girlsxvampire/cover.jpg", fit: BoxFit.cover,),
-      name: "Girls X Vampire",
-      author: "Mikami Teren",
-      artist: "Chigusa Minori",
-      genres: ["Comedy", "Girl's Love", "Romance", "Slice of Life"],
-      themes: ["School Life", "Vampires", "Adaptation"],
-      format: BookFormat.manga
-    );
-
     return Scaffold(
       appBar: _buildAppBar(),
       body: SingleChildScrollView(
@@ -38,14 +29,36 @@ class StorePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            PopularTitle(book: book),
+            PopularTitle(book: makeine),
 
             SizedBox(height: 15),
 
             // TODO Book doesn't need to be there I think
-            _latestUpdates(book),
-            _staffPick(book),
-            _recentlyAdded(book),
+            _latestUpdates([
+              farmingLifeInAnotherWorld,
+              brainrotGF,
+              theNovelsExtra,
+              theExtrasAcademySurvivalGuide,
+              makeine,
+              theFragrantFlowerBloomsWithDignity,
+            ]),
+            SizedBox(height: 15),
+            _staffPick([
+              brainrotGF,
+              threeSixtyFiveDaysToTheWedding,
+              myOlderSistersFriend,
+              windBreaker,
+              theNovelsExtra
+            ]),
+            SizedBox(height: 15),
+            _recentlyAdded([
+              brainrotGF,
+              threeSixtyFiveDaysToTheWedding,
+              myOlderSistersFriend,
+              windBreaker,
+              theNovelsExtra
+            ]),
+            SizedBox(height: 15),
             // You can add more PopularTitle widgets here
           ],
         ),
@@ -53,7 +66,7 @@ class StorePage extends StatelessWidget {
     );
   }
   
-  Widget _latestUpdates(Book book) {
+  Widget _latestUpdates(List<Book> books) {
     return Padding(
       padding: EdgeInsets.all(8),
       child: Column(
@@ -66,18 +79,15 @@ class StorePage extends StatelessWidget {
             ),),
 
             SizedBox(height: 8),
-            BookView(book: book),
-            BookView(book: book),
-            BookView(book: book),
-            BookView(book: book),
-            BookView(book: book),
-            BookView(book: book),
+
+            for (final b in books)
+            BookView(book: b)
         ],
       ),
     );
   }
   
-  Widget _staffPick(Book book) {
+  Widget _staffPick(List<Book> books) {
     return Padding(
       padding: EdgeInsets.all(8),
 
@@ -92,18 +102,15 @@ class StorePage extends StatelessWidget {
       
           SizedBox(height: 8),
           SizedBox(
-            height: 200,
+            height: 220,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
+                  for (final b in books)
+                    CoverView(book: b)
                 ],
               ),
             ),
@@ -113,7 +120,7 @@ class StorePage extends StatelessWidget {
     );
   }
 
-  Widget _recentlyAdded(Book book) {
+  Widget _recentlyAdded(List<Book> books) {
     return Padding(
       padding: EdgeInsets.all(8),
 
@@ -128,18 +135,15 @@ class StorePage extends StatelessWidget {
       
           SizedBox(height: 8),
           SizedBox(
-            height: 200,
+            height: 220,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
-                  CoverView(book: book),
+                  for (final b in books)
+                    CoverView(book: b)
                 ],
               ),
             ),

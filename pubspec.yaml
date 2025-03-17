@@ -20,3 +20,13 @@ flutter:
   uses-material-design: true
   assets:
     - assets/girlsxvampire/cover.jpg
+    - assets/makeine/cover.jpg
+    - assets/theNovelsExtra/cover.jpg
+    - assets/brainrotGF/cover.jpg
+    - assets/theFragrantFlowerBloomsWithDignity/cover.jpg
+    - assets/threeSixtyFiveDaysToTheWedding/cover.jpg
+    - assets/farmingLifeInAnotherWorld/cover.jpg
+    - assets/theExtrasAcademySurvivalGuide/cover.jpg
+    - assets/soloLeveling/cover.jpg
+    - assets/windBreaker/cover.jpg
+    - assets/myOlderSistersFriend/cover.jpg
