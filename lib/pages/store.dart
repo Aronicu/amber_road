@@ -1,5 +1,6 @@
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
+import 'package:amber_road/widgets/book_view.dart';
 import 'package:amber_road/widgets/pupular_title.dart';
 import 'package:flutter/material.dart';
 
@@ -38,9 +39,112 @@ class StorePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             PopularTitle(book: book),
+
+            SizedBox(height: 15),
+
+            // TODO Book doesn't need to be there I think
+            _latestUpdates(book),
+            _staffPick(book),
+            _recentlyAdded(book),
             // You can add more PopularTitle widgets here
           ],
         ),
+      ),
+    );
+  }
+  
+  Widget _latestUpdates(Book book) {
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            Text("Latest Updates", style: TextStyle(
+              color: colPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+            ),),
+
+            SizedBox(height: 8),
+            BookView(book: book),
+            BookView(book: book),
+            BookView(book: book),
+            BookView(book: book),
+            BookView(book: book),
+            BookView(book: book),
+        ],
+      ),
+    );
+  }
+  
+  Widget _staffPick(Book book) {
+    return Padding(
+      padding: EdgeInsets.all(8),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Staff Pick", style: TextStyle(
+            color: colPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+          ),),
+      
+          SizedBox(height: 8),
+          SizedBox(
+            height: 200,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _recentlyAdded(Book book) {
+    return Padding(
+      padding: EdgeInsets.all(8),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Recently Added", style: TextStyle(
+            color: colPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+          ),),
+      
+          SizedBox(height: 8),
+          SizedBox(
+            height: 200,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                  CoverView(book: book),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

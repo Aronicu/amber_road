@@ -17,6 +17,7 @@ class Book {
       this.description = "No Description Provided",
       this.rating = 3.35,
       this.saves = 16000,
+      this.chapters = 0,
       this.views,
     }
   );
@@ -32,4 +33,5 @@ class Book {
   double rating;
   int saves;
   String? views;
+  int chapters;
 }
