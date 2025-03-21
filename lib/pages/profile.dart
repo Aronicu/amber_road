@@ -14,7 +14,7 @@ class MangaProfileView extends StatelessWidget {
   final List<RecentManga> recentMangas;
 
   const MangaProfileView({
-    Key? key,
+    super.key,
     required this.username,
     required this.profileImageUrl,
     required this.backgroundImageUrl,
@@ -22,7 +22,7 @@ class MangaProfileView extends StatelessWidget {
     required this.followers,
     required this.following,
     required this.recentMangas,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -215,81 +215,6 @@ class MangaProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildHistorySection() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // History header
-          Row(
-            children: const [
-              Icon(
-                Icons.history,
-                color: Colors.white,
-                size: 18,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'History',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Recent manga scrollable row
-          SizedBox(
-            height: 180,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: recentMangas.length,
-              itemBuilder: (context, index) {
-                final manga = recentMangas[index];
-                return Container(
-                  width: 100,
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Manga cover image
-                      Container(
-                        height: 140,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: AssetImage(manga.coverUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Manga title
-                      Text(
-                        manga.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // Restored Author Center button
   Widget _buildAuthorCenterButton() {
     return Padding(
@@ -329,7 +254,7 @@ class RecentManga {
 
 // Example usage
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -139,7 +139,7 @@ class _UpdatePageState extends State<UpdatePage> {
             ),
           ),
         ),
-        ...updates.map((update) => _buildUpdateItemTile(update)).toList(),
+        ...updates.map((update) => _buildUpdateItemTile(update)),
       ],
     );
   }
