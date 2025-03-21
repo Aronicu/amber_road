@@ -4,6 +4,7 @@ import 'package:amber_road/models/book.dart';
 import 'package:amber_road/widgets/book_view.dart';
 import 'package:amber_road/widgets/pupular_title.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class StorePage extends StatelessWidget {
   const StorePage({super.key});
@@ -29,8 +30,13 @@ class StorePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            PopularTitle(book: makeine),
-
+            GestureDetector(
+              onTap: () {
+                final currentRoute = GoRouterState.of(context).matchedLocation;
+                context.go('/book/${makeine.id}', extra: currentRoute);
+              },
+              child: PopularTitle(book: makeine)
+            ),
             SizedBox(height: 15),
 
             // TODO Book doesn't need to be there I think

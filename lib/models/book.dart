@@ -7,6 +7,7 @@ enum BookFormat {
 class Book {
   Book(
     this.cover,
+    this.id,
     {
       this.name = "Test",
       this.author = "John Doe",
@@ -22,6 +23,7 @@ class Book {
     }
   );
 
+  int id;
   Image cover;
   String name;
   String author;

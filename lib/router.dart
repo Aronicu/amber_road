@@ -1,4 +1,6 @@
+import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
+import 'package:amber_road/pages/book_details.dart';
 import 'package:amber_road/pages/library.dart';
 import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
@@ -88,7 +90,24 @@ class AppNavigation {
             ]
           ),
         ]
-      )
+      ),
+      GoRoute(
+        path: '/book/:id',
+        name: 'bookDetails',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final bookId = int.parse(state.pathParameters['id']!);
+
+          final book = getBookByID(bookId);
+
+          // Get the referring route from extra data if available
+          final fromRoute = state.extra != null && state.extra is String 
+              ? state.extra as String 
+              : '/store';
+
+          return BookDetailsPage(book: book, fromRoute: fromRoute,);
+        }
+      ),
     ]
   );
 }

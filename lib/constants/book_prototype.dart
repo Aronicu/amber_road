@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 final Book girlsxvampire = Book(
   Image.asset("assets/girlsxvampire/cover.jpg", fit: BoxFit.cover,),
+  0,
   name: "Girls X Vampire",
   author: "Mikami Teren",
   artist: "Chigusa Minori",
@@ -13,6 +14,7 @@ final Book girlsxvampire = Book(
 
 final Book makeine = Book(
   Image.asset("assets/makeine/cover.jpg", fit: BoxFit.cover,),
+  1,
   name: "Too Many Losing Heroines",
   author: "Takibi Amamori",
   artist: "Imigimuru",
@@ -23,6 +25,7 @@ final Book makeine = Book(
 
 final Book theNovelsExtra = Book(
   Image.asset("assets/theNovelsExtra/cover.jpg", fit: BoxFit.cover,),
+  2,
   name: "The Novel's Extra",
   author: "Jee Gab Song",
   artist: "CarroToon",
@@ -33,6 +36,7 @@ final Book theNovelsExtra = Book(
 
 final Book brainrotGF = Book(
   Image.asset("assets/brainrotGF/cover.jpg", fit: BoxFit.cover,),
+  3,
   name: "Brainrot GF",
   author: "Senukin",
   artist: "Senukin",
@@ -42,6 +46,7 @@ final Book brainrotGF = Book(
 
 final Book theFragrantFlowerBloomsWithDignity = Book(
   Image.asset("assets/theFragrantFlowerBloomsWithDignity/cover.jpg", fit: BoxFit.cover,),
+  4,
   name: "The Fragrant Flower Blooms with Dignity",
   author: "Mikami Saka",
   artist: "Mikami Saka",
@@ -52,6 +57,7 @@ final Book theFragrantFlowerBloomsWithDignity = Book(
 
 final Book threeSixtyFiveDaysToTheWedding = Book(
   Image.asset("assets/threeSixtyFiveDaysToTheWedding/cover.jpg", fit: BoxFit.cover,),
+  5,
   name: "365 Days to the Wedding",
   author: "Wakami Tamiki",
   artist: "Wakami Tamiki",
@@ -62,6 +68,7 @@ final Book threeSixtyFiveDaysToTheWedding = Book(
 
 final Book farmingLifeInAnotherWorld = Book(
   Image.asset("assets/farmingLifeInAnotherWorld/cover.jpg", fit: BoxFit.cover,),
+  6,
   name: "Farming Life in Another World",
   author: "Naitou Kinosuke",
   artist: "Tsurugi Yasuyuki",
@@ -72,6 +79,7 @@ final Book farmingLifeInAnotherWorld = Book(
 
 final Book theExtrasAcademySurvivalGuide = Book(
   Image.asset("assets/theExtrasAcademySurvivalGuide/cover.jpg", fit: BoxFit.cover,),
+  7,
   name: "The Extra's Academy Survival Guide",
   author: "Korita",
   artist: "Green Kyrin",
@@ -82,6 +90,7 @@ final Book theExtrasAcademySurvivalGuide = Book(
 
 final Book soloLeveling = Book(
   Image.asset("assets/soloLeveling/cover.jpg", fit: BoxFit.cover,),
+  8,
   name: "Solo Leveling",
   author: "Chugong",
   artist: "REDICE Studio",
@@ -92,6 +101,7 @@ final Book soloLeveling = Book(
 
 final Book windBreaker = Book(
   Image.asset("assets/windBreaker/cover.jpg", fit: BoxFit.cover,),
+  9,
   name: "Wind Breaker",
   author: "Jo Yongseok",
   artist: "Jo Yongseok",
@@ -102,6 +112,7 @@ final Book windBreaker = Book(
 
 final Book myOlderSistersFriend = Book(
   Image.asset("assets/myOlderSistersFriend/cover.jpg", fit: BoxFit.cover,),
+  10,
   name: "My Older Sister's Friend",
   author: "Takase Waka",
   artist: "Takase Waka",
@@ -110,3 +121,32 @@ final Book myOlderSistersFriend = Book(
   format: BookFormat.manga
 );
 
+
+Book getBookByID(int id) {
+  switch (id) {
+    case 0:
+      return girlsxvampire;
+    case 1:
+      return makeine;
+    case 2:
+      return theNovelsExtra;
+    case 3:
+      return brainrotGF;
+    case 4:
+      return theFragrantFlowerBloomsWithDignity;
+    case 5:
+      return threeSixtyFiveDaysToTheWedding;
+    case 6:
+      return farmingLifeInAnotherWorld;
+    case 7:
+      return theExtrasAcademySurvivalGuide;
+    case 8:
+      return soloLeveling;
+    case 9:
+      return windBreaker;
+    case 10:
+      return myOlderSistersFriend;
+  }
+
+  return girlsxvampire;
+}
