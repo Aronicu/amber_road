@@ -9,7 +9,8 @@ final Book girlsxvampire = Book(
   artist: "Chigusa Minori",
   genres: ["Comedy", "Girl's Love", "Romance", "Slice of Life"],
   themes: ["School Life", "Vampires", "Adaptation"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 8,
 );
 
 final Book makeine = Book(
@@ -21,6 +22,7 @@ final Book makeine = Book(
   genres: ["Comedy", "Drama", "Romance", "Slice of Life"],
   themes: ["School Life"],
   format: BookFormat.webnovel,
+  chapters: 21,
 );
 
 final Book theNovelsExtra = Book(
@@ -31,7 +33,8 @@ final Book theNovelsExtra = Book(
   artist: "CarroToon",
   genres: ["Action", "Adventure", "Drama", "Fantasy", "Isekai"],
   themes: ["Demons", "Magic", "Monsters", "Reincarnation", "School Life"],
-  format: BookFormat.webtoon
+  format: BookFormat.webtoon,
+  chapters: 124,
 );
 
 final Book brainrotGF = Book(
@@ -41,7 +44,8 @@ final Book brainrotGF = Book(
   author: "Senukin",
   artist: "Senukin",
   genres: ["Comedy", "Romance", "Slice Of Life"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 19,
 );
 
 final Book theFragrantFlowerBloomsWithDignity = Book(
@@ -52,7 +56,8 @@ final Book theFragrantFlowerBloomsWithDignity = Book(
   artist: "Mikami Saka",
   genres: ["Comedy", "Drama", "Romance", "Slice of Life"],
   themes: ["School Life"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 147,
 );
 
 final Book threeSixtyFiveDaysToTheWedding = Book(
@@ -63,7 +68,8 @@ final Book threeSixtyFiveDaysToTheWedding = Book(
   artist: "Wakami Tamiki",
   genres: ["Drama", "Slice of Life", "Romance"],
   themes: ["Office Workers"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 110,
 );
 
 final Book farmingLifeInAnotherWorld = Book(
@@ -74,7 +80,8 @@ final Book farmingLifeInAnotherWorld = Book(
   artist: "Tsurugi Yasuyuki",
   genres: ["Adventure", "Comedy", "Fantasy", "Isekai", "Slice of Life"],
   themes: ["Harem", "Magic", "Monster Girls", "Survival"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 291,
 );
 
 final Book theExtrasAcademySurvivalGuide = Book(
@@ -85,7 +92,8 @@ final Book theExtrasAcademySurvivalGuide = Book(
   artist: "Green Kyrin",
   genres: ["Action", "Adventure", "Drama", "Fantasy", "Isekai", "Romance"],
   themes: ["Harem", "Magic", "Reincarnation", "Slice of Life", "Supernatural", "Time Travel"],
-  format: BookFormat.webtoon
+  format: BookFormat.webtoon,
+  chapters: 73,
 );
 
 final Book soloLeveling = Book(
@@ -96,7 +104,8 @@ final Book soloLeveling = Book(
   artist: "REDICE Studio",
   genres: ["Action", "Adventure", "Drama", "Fantasy"],
   themes: ["Magic", "Monsters", "Supernatural"],
-  format: BookFormat.webtoon
+  format: BookFormat.webtoon,
+  chapters: 200,
 );
 
 final Book windBreaker = Book(
@@ -107,7 +116,8 @@ final Book windBreaker = Book(
   artist: "Jo Yongseok",
   genres: ["Action", "Adventure", "Comedy", "Drama", "Slice of Life", "Sports"],
   themes: ["Delinquents", "School Life"],
-  format: BookFormat.webtoon
+  format: BookFormat.webtoon,
+  chapters: 153,
 );
 
 final Book myOlderSistersFriend = Book(
@@ -118,7 +128,8 @@ final Book myOlderSistersFriend = Book(
   artist: "Takase Waka",
   genres: ["Comedy", "Romance", "Slice of Life"],
   themes: ["Gyaru", "School Life"],
-  format: BookFormat.manga
+  format: BookFormat.manga,
+  chapters: 17,
 );
 
 
