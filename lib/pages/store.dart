@@ -132,13 +132,22 @@ class StorePage extends StatelessWidget {
                       Wrap(
                         spacing: 4.0,
                         children: book.genres
-                            .map((genre) => Chip(
-                                  label: Text(
-                                    genre,
-                                    style: TextStyle(color: Colors.white, fontSize: 12),
-                                  ),
-                                  backgroundColor: Colors.grey[700],
-                                ))
+                            .map((genre) => Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                              ),
+                              child: Text(
+                                genre,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ))
                             .toList(),
                       ),
                     ],

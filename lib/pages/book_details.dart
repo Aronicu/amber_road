@@ -46,7 +46,6 @@ class _BookDetailsState extends State<BookDetailsPage> {
   Widget _buildHeader(BuildContext context, Book book) {
     final theme = Theme.of(context);
     final primaryColor = theme.primaryColor;
-
     return SizedBox(
       height: 300.0, // Set the fixed height
       child: Stack(
@@ -60,7 +59,6 @@ class _BookDetailsState extends State<BookDetailsPage> {
                     primaryColor.withAlpha(20), // Approximation for 0% at 25%
                     primaryColor,  // 100% opacity
                   ],
-                  // stops: const,
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ).createShader(rect);
@@ -71,49 +69,70 @@ class _BookDetailsState extends State<BookDetailsPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(
-                  width: 100.0,
-                  height: 150.0,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: book.cover,
-                  ),
+              children: [
+                // Top section with cover and title
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 100.0,
+                      height: 150.0,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: book.cover,
+                      ),
+                    ),
+                    SizedBox(width: 16.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            book.name,
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            book.author,
+                            style: TextStyle(color: Colors.grey[300]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 16.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        book.name,
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        book.author,
-                        style: TextStyle(color: Colors.grey[300]),
-                      ),
-                      SizedBox(height: 12.0),
-                      Wrap(
-                        spacing: 4.0,
-                        children: book.genres
-                            .map((genre) => Chip(
-                                  label: Text(
-                                    genre,
-                                    style: TextStyle(color: Colors.white, fontSize: 12),
-                                  ),
-                                  backgroundColor: Colors.grey[700],
-                                ))
-                            .toList(),
-                      ),
-                    ],
+                // Spacer to push genres to bottom
+                Spacer(),
+                // Bottom section with genres
+                Container(
+                  width: double.infinity,
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: book.genres
+                        .map((genre) => Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                              ),
+                              child: Text(
+                                genre,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ))
+                        .toList(),
                   ),
                 ),
               ],
