@@ -14,6 +14,11 @@ class BookDetailsPage extends StatefulWidget {
 }
 
 class _BookDetailsState extends State<BookDetailsPage> {
+  // State for expandable description
+  bool _isDescriptionExpanded = false;
+  // State for expandable details
+  bool _isDetailsExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,11 +39,15 @@ class _BookDetailsState extends State<BookDetailsPage> {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildHeader(context, widget.book),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildHeader(context, widget.book),
+            _buildDescription(context, widget.book),
+            _buildDetailSection(context, widget.book),
+          ],
+        ),
       ),
     );
   }
@@ -56,7 +65,7 @@ class _BookDetailsState extends State<BookDetailsPage> {
                 return LinearGradient(
                   colors: [
                     primaryColor,  // 100% opacity
-                    primaryColor.withAlpha(20), // Approximation for 0% at 25%
+                    primaryColor.withValues(alpha: 0.2), // Approximation for 0% at 25%
                     primaryColor,  // 100% opacity
                   ],
                   begin: Alignment.topCenter,
@@ -143,4 +152,226 @@ class _BookDetailsState extends State<BookDetailsPage> {
     );
   }
 
+  Widget _buildDescription(BuildContext context, Book book) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Description',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isDescriptionExpanded = !_isDescriptionExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Text(
+                    _isDescriptionExpanded ? 'Show Less' : 'Show More',
+                    style: TextStyle(
+                      color: colPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+          AnimatedCrossFade(
+            duration: Duration(milliseconds: 300),
+            crossFadeState: _isDescriptionExpanded 
+                ? CrossFadeState.showSecond 
+                : CrossFadeState.showFirst,
+            firstChild: Text(
+              _truncateDescription(book.description),
+              style: TextStyle(
+                fontSize: 14.0,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            secondChild: Text(
+              book.description,
+              style: TextStyle(
+                fontSize: 14.0,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _truncateDescription(String text) {
+    if (text.length <= 150) return text;
+    return text.substring(0, 150) + '...';
+  }
+
+  Widget _buildDetailSection(BuildContext context, Book book) {
+    return Container(
+      // color: backgroundColor,
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Details',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isDetailsExpanded = !_isDetailsExpanded;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Text(
+                      _isDetailsExpanded ? 'Show Less' : 'Show More',
+                      style: TextStyle(
+                        color: colPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 8.0),
+          AnimatedCrossFade(
+            duration: Duration(milliseconds: 300),
+            crossFadeState: _isDetailsExpanded 
+                ? CrossFadeState.showSecond 
+                : CrossFadeState.showFirst,
+            firstChild: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  _buildDetailRow('Author', book.author, context),
+                  _buildDetailRow('Artist', book.artist, context),
+                ],
+              ),
+            ),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('Author', book.author, context),
+                _buildDetailRow('Artist', book.artist, context),
+                _buildGenreSection('Genres', book.genres, context),
+                _buildGenreSection('Themes', book.themes, context),
+                _buildDetailRow('Format', _formatToString(book.format), context),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80.0,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenreSection(String label, List<String> items, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: items.map((item) => _buildGenreChip(item, context)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenreChip(String label, BuildContext context) {
+    final darkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+      decoration: BoxDecoration(
+        color: darkMode ? Colors.grey[900] : Colors.grey[300],
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12.0,
+          color: darkMode ? Colors.white : Colors.black,
+        ),
+      ),
+    );
+  }
+
+  String _formatToString(BookFormat format) {
+    switch (format) {
+      case BookFormat.manga:
+        return 'Manga';
+      case BookFormat.webtoon:
+        return 'Web Comic';
+      case BookFormat.webnovel:
+        return 'Web Novel';
+    }
+  }
 }
