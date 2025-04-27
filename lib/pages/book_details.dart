@@ -121,7 +121,7 @@ class _BookDetailsState extends State<BookDetailsPage> {
                 // Spacer to push genres to bottom
                 Spacer(),
                 // Bottom section with genres
-                Container(
+                SizedBox(
                   width: double.infinity,
                   child: Wrap(
                     spacing: 8.0,
@@ -220,7 +220,7 @@ class _BookDetailsState extends State<BookDetailsPage> {
 
   String _truncateDescription(String text) {
     if (text.length <= 150) return text;
-    return text.substring(0, 150) + '...';
+    return '${text.substring(0, 150)}...';
   }
 
   Widget _buildDetailSection(BuildContext context, Book book) {
