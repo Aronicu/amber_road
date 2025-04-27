@@ -16,102 +16,77 @@ class AppNavigation {
   static String initialRoute = '/store';
 
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _rootNavigatorStore = GlobalKey<NavigatorState>();
-  static final _rootNavigatorLibrary = GlobalKey<NavigatorState>();
-  static final _rootNavigatorUpdates = GlobalKey<NavigatorState>();
-  static final _rootNavigatorProfile = GlobalKey<NavigatorState>();
 
   static final GoRouter router = GoRouter(
     initialLocation: initialRoute,
-
     navigatorKey: _rootNavigatorKey,
+    
     routes: <RouteBase>[
-      // Main Route
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainWrapper(navigationShell: navigationShell,);
         },
-        branches: <StatefulShellBranch>[
-          StatefulShellBranch(
-            navigatorKey: _rootNavigatorStore,
-            routes: [
-              GoRoute(
-                path: '/store',
-                name: 'store',
-                builder: (context, state) {
-                  return StorePage(
-                    key: state.pageKey
-                  );
-                }
-              ),
-            ]
-          ),
-
-          StatefulShellBranch(
-            navigatorKey: _rootNavigatorLibrary,
-            routes: [
-              GoRoute(
-                path: '/library',
-                name: 'library',
-                builder: (context, state) {
-                  return LibraryPage(
-                    key: state.pageKey
-                  );
-                }
-              ),
-            ]
-          ),
-
-          StatefulShellBranch(
-            navigatorKey: _rootNavigatorUpdates,
-            routes: [
-              GoRoute(
-                path: '/updates',
-                name: 'updates',
-                builder: (context, state) {
-                  return UpdatePage(
-                    key: state.pageKey
-                  );
-                }
-              ),
-            ]
-          ),
-
-          StatefulShellBranch(
-            navigatorKey: _rootNavigatorProfile,
-            routes: [
-              GoRoute(
-                path: '/profile',
-                name: 'profile',
-                builder: (context, state) {
-                  return ProfilePage(
-                    key: state.pageKey
-                  );
-                }
-              ),
-            ]
-          ),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/store',
+              name: 'store',
+              builder: (context, state) {
+                return StorePage(
+                  key: state.pageKey
+                );
+              }
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/library',
+              name: 'library',
+              builder: (context, state) {
+                return LibraryPage(
+                  key: state.pageKey
+                );
+              }
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/updates',
+              name: 'updates',
+              builder: (context, state) {
+                return UpdatePage(
+                  key: state.pageKey
+                );
+              }
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/profile',
+              name: 'profile',
+              builder: (context, state) {
+                return ProfilePage(
+                  key: state.pageKey
+                );
+              }
+            ),
+          ]),
         ]
       ),
-      GoRoute(
-        path: '/book/:id',
-        name: 'bookDetails',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final bookId = int.parse(state.pathParameters['id']!);
+      
+      GoRoute(path: "/book/:id", name: "bookDetails", builder: (context, state) {
+        final bookId = int.parse(state.pathParameters['id']!);
 
-          final book = getBookByID(bookId);
+        final book = getBookByID(bookId);
 
-          // Get the referring route from extra data if available
-          final fromRoute = state.extra != null && state.extra is String 
-              ? state.extra as String 
-              : '/store';
+        // Get the referring route from extra data if available
+        final fromRoute = state.extra != null && state.extra is String 
+            ? state.extra as String 
+            : '/store';
 
-          return BookDetailsPage(book: book, fromRoute: fromRoute,);
-        }
-      ),
-    ]
-  );
+        return BookDetailsPage(book: book, fromRoute: fromRoute,);
+      }),
+  ]);
 }
 
 class MainWrapper extends StatefulWidget {

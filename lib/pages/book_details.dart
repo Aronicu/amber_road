@@ -22,33 +22,39 @@ class _BookDetailsState extends State<BookDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.go(widget.fromRoute);
-          },
-        ),
-        title: Text(
-          widget.book.name,
-          style: TextStyle(
-            color: colPrimary,
-            fontWeight: FontWeight.bold,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        context.go(widget.fromRoute);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              context.go(widget.fromRoute);
+            },
+          ),
+          title: Text(
+            widget.book.name,
+            style: TextStyle(
+              color: colPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildHeader(context, widget.book),
-            _buildDescription(context, widget.book),
-            _buildDetailSection(context, widget.book),
-            _buildChapters(context),
-          ],
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildHeader(context, widget.book),
+              _buildDescription(context, widget.book),
+              _buildDetailSection(context, widget.book),
+              _buildChapters(context),
+            ],
+          ),
         ),
       ),
     );
