@@ -5,8 +5,10 @@ import 'package:amber_road/pages/library.dart';
 import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
 import 'package:amber_road/pages/updates.dart';
+import 'package:amber_road/providers/google_signin_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class AppNavigation {
   AppNavigation._();
@@ -130,9 +132,12 @@ class _MainWrapperState extends State<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.navigationShell,
-      bottomNavigationBar: _buildNavigations(),
+    return ChangeNotifierProvider(
+      create: (context) => GoogleSigninProvider(),
+      child: Scaffold(
+        body: widget.navigationShell,
+        bottomNavigationBar: _buildNavigations(),
+      ),
     );
   }
 

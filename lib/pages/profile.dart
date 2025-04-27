@@ -1,12 +1,13 @@
 import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
+import 'package:amber_road/providers/google_signin_provider.dart';
 import 'package:amber_road/widgets/book_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MangaProfileView extends StatelessWidget {
-  final String username;
-  final String profileImageUrl;
   final String backgroundImageUrl;
   final int coins;
   final int followers;
@@ -15,8 +16,6 @@ class MangaProfileView extends StatelessWidget {
 
   const MangaProfileView({
     super.key,
-    required this.username,
-    required this.profileImageUrl,
     required this.backgroundImageUrl,
     required this.coins,
     required this.followers,
@@ -28,14 +27,37 @@ class MangaProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          _buildProfileHeader(),
-          _buildStatsSection(),
-          _history([theNovelsExtra,farmingLifeInAnotherWorld,soloLeveling,windBreaker]),
-          // Restored Author Center button
-          _buildAuthorCenterButton(),
-        ],
+      body: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasData) {
+            return Column(
+              children: [
+                _buildProfileHeader(context),
+                _buildStatsSection(),
+                _history([theNovelsExtra,farmingLifeInAnotherWorld,soloLeveling,windBreaker]),
+                // Restored Author Center button
+                _buildAuthorCenterButton(),
+                
+              ],
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Something Went Wrong"));
+          } else {
+            return Center(child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
+              ),
+              child: Text("Sign In With Google"),
+              onPressed: () {
+                final provider = Provider.of<GoogleSigninProvider>(context, listen: false);
+                provider.googleLogIn();
+              },
+            ));
+          }
+        }
       ),
     );
   }
@@ -73,7 +95,8 @@ class MangaProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser!;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -95,7 +118,7 @@ class MangaProfileView extends StatelessWidget {
           bottom: -33,
           left: 16,
           child: Text(
-            username,
+            user.displayName!,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -104,21 +127,42 @@ class MangaProfileView extends StatelessWidget {
           ),
         ),
 
-        // Profile Picture (Circle Avatar)
+        // Profile Picture (Circle Avatar) with PopupMenu
         Positioned(
           right: 16,
           bottom: -25,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black, width: 2),
-            ),
-            child: CircleAvatar(
-              radius: 25,
-              backgroundImage: AssetImage(profileImageUrl),
+          child: PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'edit') {
+                // TODO: Navigate to Edit Profile page
+              } else if (value == 'logout') {
+                final provider = Provider.of<GoogleSigninProvider>(context, listen: false);
+                provider.logout();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Text('Edit Profile'),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Text('Logout'),
+              ),
+            ],
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: CircleAvatar(
+                radius: 25,
+                backgroundImage: NetworkImage(user.photoURL!),
+              ),
             ),
           ),
         ),
+
       ],
     );
   }
@@ -215,19 +259,23 @@ class MangaProfileView extends StatelessWidget {
     );
   }
 
-  // Restored Author Center button
   Widget _buildAuthorCenterButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const Center(
-          child: Text(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[900],
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          onPressed: () {
+            // TODO: Add your button action here
+          },
+          child: const Text(
             'Author Center',
             style: TextStyle(
               color: Colors.white,
@@ -239,6 +287,7 @@ class MangaProfileView extends StatelessWidget {
       ),
     );
   }
+
 }
 
 // Model for recent manga
@@ -275,8 +324,6 @@ class ProfilePage extends StatelessWidget {
     ];
 
     return MangaProfileView(
-      username: 'Aronic',
-      profileImageUrl: 'assets/profile/pfp.jpg',
       backgroundImageUrl: 'assets/background/pft.jpg',
       coins: 367,
       followers: 0,
