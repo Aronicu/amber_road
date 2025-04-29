@@ -3,6 +3,7 @@ import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/providers/google_signin_provider.dart';
 import 'package:amber_road/widgets/book_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,53 +30,89 @@ class MangaProfileView extends StatelessWidget {
       backgroundColor: Colors.black,
       body: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, authSnapshot) {
+          if (authSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasData) {
-            return Column(
-              children: [
-                _buildProfileHeader(context),
-                _buildStatsSection(),
-                _history([theNovelsExtra,farmingLifeInAnotherWorld,soloLeveling,windBreaker]),
-                // Restored Author Center button
-                _buildAuthorCenterButton(),
-                
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Something Went Wrong"));
+          } else if (authSnapshot.hasData) {
+            final User? user = authSnapshot.data;
+            if (user != null) {
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
+                builder: (context, firestoreSnapshot) {
+                  if (firestoreSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (firestoreSnapshot.hasError) {
+                    return Center(child: Text("Error loading user data: ${firestoreSnapshot.error}"));
+                  } else if (firestoreSnapshot.hasData && firestoreSnapshot.data!.exists) {
+                    final userData = firestoreSnapshot.data!;
+                    return Column(
+                      children: [
+                        _buildProfileHeader(context, userData), // Pass userData
+                        _buildStatsSection(userData), // Pass userData if needed
+                        _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
+                        _buildAuthorCenterButton(),
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        _buildProfileHeader(context, null), // Handle case with no Firestore data
+                        _buildStatsSection(null), // Handle case with no Firestore data
+                        _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
+                        _buildAuthorCenterButton(),
+                        const Center(child: Text("User data not found in Firestore.")),
+                      ],
+                    );
+                  }
+                },
+              );
+            } else {
+              return Column(
+                children: [
+                  _buildProfileHeader(context, null), // Handle no authenticated user
+                  _buildStatsSection(null), // Handle no authenticated user
+                  _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
+                  _buildAuthorCenterButton(),
+                  const Center(child: Text("No user logged in.")),
+                ],
+              );
+            }
+          } else if (authSnapshot.hasError) {
+            return Center(child: Text("Something Went Wrong with Authentication"));
           } else {
-            return Center(child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+            return Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text("Sign In With Google"),
+                onPressed: () {
+                  final provider = Provider.of<GoogleSigninProvider>(context, listen: false);
+                  provider.googleLogIn();
+                },
               ),
-              child: Text("Sign In With Google"),
-              onPressed: () {
-                final provider = Provider.of<GoogleSigninProvider>(context, listen: false);
-                provider.googleLogIn();
-              },
-            ));
+            );
           }
-        }
+        },
       ),
     );
   }
 
   Widget _history(List<Book> books) {
     return Padding(
-      padding: EdgeInsets.all(8),
-
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("History", style: TextStyle(
-            color: colPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-          ),),
-      
-          SizedBox(height: 8),
+          const Text(
+            "History",
+            style: TextStyle(
+              color: colPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+            ),
+          ),
+          const SizedBox(height: 8),
           SizedBox(
             height: 220,
             child: SingleChildScrollView(
@@ -84,8 +121,7 @@ class MangaProfileView extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final b in books)
-                    CoverView(book: b)
+                  for (final b in books) CoverView(book: b),
                 ],
               ),
             ),
@@ -95,8 +131,10 @@ class MangaProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildProfileHeader(BuildContext context, DocumentSnapshot? userData) {
     final user = FirebaseAuth.instance.currentUser!;
+    final username = userData?['username'] as String? ?? user.displayName ?? 'Guest';
+    final profileImageUrl = user.photoURL!;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -118,7 +156,7 @@ class MangaProfileView extends StatelessWidget {
           bottom: -33,
           left: 16,
           child: Text(
-            user.displayName!,
+            username,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -157,17 +195,20 @@ class MangaProfileView extends StatelessWidget {
               ),
               child: CircleAvatar(
                 radius: 25,
-                backgroundImage: NetworkImage(user.photoURL!),
+                backgroundImage: NetworkImage(profileImageUrl),
               ),
             ),
           ),
         ),
-
       ],
     );
   }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(DocumentSnapshot? userData) {
+    final followersCount = userData?['followers'] as int? ?? followers;
+    final followingCount = userData?['following'] as int? ?? following;
+    final coinsCount = userData?['coins'] as int? ?? coins;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
       child: Column(
@@ -176,7 +217,7 @@ class MangaProfileView extends StatelessWidget {
           Row(
             children: [
               Text(
-                '$followers',
+                '$followersCount',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -191,7 +232,7 @@ class MangaProfileView extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Text(
-                '$following',
+                '$followingCount',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -206,9 +247,7 @@ class MangaProfileView extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           // Coins and Add More button
           Row(
             children: [
@@ -227,7 +266,7 @@ class MangaProfileView extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '$coins',
+                      '$coinsCount',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -287,7 +326,6 @@ class MangaProfileView extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // Model for recent manga
@@ -307,7 +345,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sample data
+    // Sample data (can be removed or used as defaults)
     final recentMangas = [
       RecentManga(
         title: 'Brainrot GF',
