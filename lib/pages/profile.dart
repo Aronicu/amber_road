@@ -8,21 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MangaProfileView extends StatelessWidget {
-  final String backgroundImageUrl;
-  final int coins;
-  final int followers;
-  final int following;
-  final List<RecentManga> recentMangas;
 
-  const MangaProfileView({
-    super.key,
-    required this.backgroundImageUrl,
-    required this.coins,
-    required this.followers,
-    required this.following,
-    required this.recentMangas,
-  });
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +35,8 @@ class MangaProfileView extends StatelessWidget {
                     final userData = firestoreSnapshot.data!;
                     return Column(
                       children: [
-                        _buildProfileHeader(context, userData), // Pass userData
-                        _buildStatsSection(userData), // Pass userData if needed
+                        _buildProfileHeader(context, userData),
+                        _buildStatsSection(userData),
                         _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                         _buildAuthorCenterButton(),
                       ],
@@ -56,8 +44,8 @@ class MangaProfileView extends StatelessWidget {
                   } else {
                     return Column(
                       children: [
-                        _buildProfileHeader(context, null), // Handle case with no Firestore data
-                        _buildStatsSection(null), // Handle case with no Firestore data
+                        _buildProfileHeader(context, null), 
+                        _buildStatsSection(null),
                         _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                         _buildAuthorCenterButton(),
                         const Center(child: Text("User data not found in Firestore.")),
@@ -69,8 +57,8 @@ class MangaProfileView extends StatelessWidget {
             } else {
               return Column(
                 children: [
-                  _buildProfileHeader(context, null), // Handle no authenticated user
-                  _buildStatsSection(null), // Handle no authenticated user
+                  _buildProfileHeader(context, null),
+                  _buildStatsSection(null),
                   _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                   _buildAuthorCenterButton(),
                   const Center(child: Text("No user logged in.")),
@@ -135,6 +123,8 @@ class MangaProfileView extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser!;
     final username = userData?['username'] as String? ?? user.displayName ?? 'Guest';
     final profileImageUrl = user.photoURL!;
+    final String backgroundImageUrl = 'assets/background/pft.jpg';
+    
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -205,9 +195,9 @@ class MangaProfileView extends StatelessWidget {
   }
 
   Widget _buildStatsSection(DocumentSnapshot? userData) {
-    final followersCount = userData?['followers'] as int? ?? followers;
-    final followingCount = userData?['following'] as int? ?? following;
-    final coinsCount = userData?['coins'] as int? ?? coins;
+    final int followers = userData?['followers'] as int? ?? 0;
+    final int following = userData?['following'] as int? ?? 98;
+    final int coins = userData?['coins'] as int? ?? 367;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
@@ -217,7 +207,7 @@ class MangaProfileView extends StatelessWidget {
           Row(
             children: [
               Text(
-                '$followersCount',
+                '$followers',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -232,7 +222,7 @@ class MangaProfileView extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Text(
-                '$followingCount',
+                '$following',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -266,7 +256,7 @@ class MangaProfileView extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '$coinsCount',
+                      '$coins',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -324,49 +314,6 @@ class MangaProfileView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// Model for recent manga
-class RecentManga {
-  final String title;
-  final String coverUrl;
-
-  RecentManga({
-    required this.title,
-    required this.coverUrl,
-  });
-}
-
-// Example usage
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // Sample data (can be removed or used as defaults)
-    final recentMangas = [
-      RecentManga(
-        title: 'Brainrot GF',
-        coverUrl: 'https://example.com/manga1.jpg',
-      ),
-      RecentManga(
-        title: '365 Days to the Wedding',
-        coverUrl: 'https://example.com/manga2.jpg',
-      ),
-      RecentManga(
-        title: 'My Older Sister\'s Friend',
-        coverUrl: 'https://example.com/manga3.jpg',
-      ),
-    ];
-
-    return MangaProfileView(
-      backgroundImageUrl: 'assets/background/pft.jpg',
-      coins: 367,
-      followers: 0,
-      following: 98,
-      recentMangas: recentMangas,
     );
   }
 }
