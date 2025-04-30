@@ -199,8 +199,8 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildStatsSection(DocumentSnapshot? userData) {
     final int followers = userData?['followers'] as int? ?? 0;
-    final int following = userData?['following'] as int? ?? 98;
-    final int coins = userData?['coins'] as int? ?? 367;
+    final int following = userData?['following'] as int? ?? 0;
+    final int coins = userData?['coins'] as int? ?? 0;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
