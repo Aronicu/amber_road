@@ -123,27 +123,35 @@ class ProfilePage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser!;
     final username = userData?['username'] as String? ?? user.displayName ?? 'Guest';
     final profileImageUrl = user.photoURL!;
-    final String backgroundImageUrl = 'assets/background/pft.jpg';
-    
+    const double bgHeight = 150;
+    const double avatarRadius = 25;
+    const double overflow = avatarRadius; // how far it sticks out
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Background Image
-        Container(
-          height: 150,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(backgroundImageUrl),
-              fit: BoxFit.cover,
+        // wrap background in Column and add transparent space
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: bgHeight,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/background/pft.jpg'),
+                  fit: BoxFit.cover,
+                ),
+                border: Border.all(color: Colors.black, width: 1),
+              ),
             ),
-            border: Border.all(color: Colors.black, width: 1),
-          ),
+            SizedBox(height: overflow), // reserve hit-test area
+          ],
         ),
 
-        // Username text positioned at bottom left
+        // Username
         Positioned(
-          bottom: -33,
+          bottom: overflow - 33, // originally bottom: -33
           left: 16,
           child: Text(
             username,
@@ -155,10 +163,10 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
 
-        // Profile Picture (Circle Avatar) with PopupMenu
+        // Profile Picture with PopupMenu
         Positioned(
           right: 16,
-          bottom: -25,
+          bottom: 0,                // now flush with the new bottom
           child: PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'edit') {
@@ -168,15 +176,9 @@ class ProfilePage extends StatelessWidget {
                 provider.logout();
               }
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Text('Edit Profile'),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'edit', child: Text('Edit Profile')),
+              PopupMenuItem(value: 'logout', child: Text('Logout')),
             ],
             child: Container(
               decoration: BoxDecoration(
@@ -184,7 +186,7 @@ class ProfilePage extends StatelessWidget {
                 border: Border.all(color: Colors.black, width: 2),
               ),
               child: CircleAvatar(
-                radius: 25,
+                radius: avatarRadius,
                 backgroundImage: NetworkImage(profileImageUrl),
               ),
             ),
@@ -193,6 +195,7 @@ class ProfilePage extends StatelessWidget {
       ],
     );
   }
+
 
   Widget _buildStatsSection(DocumentSnapshot? userData) {
     final int followers = userData?['followers'] as int? ?? 0;
