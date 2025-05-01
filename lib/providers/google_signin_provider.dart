@@ -44,6 +44,7 @@ class GoogleSigninProvider extends ChangeNotifier {
         "uid": user.uid,
         "username": username,
         "profilePhoto": profilePhoto,
+        "coverPhoto": "",
         "isAuthor": false,
         "isModerator": false,
         "followers": 0,
