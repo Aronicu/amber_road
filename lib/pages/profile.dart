@@ -123,11 +123,13 @@ class ProfilePage extends StatelessWidget {
   Widget _buildProfileHeader(BuildContext context, DocumentSnapshot? userData) {
     final user = FirebaseAuth.instance.currentUser!;
     final username = userData?['username'] as String? ?? user.displayName ?? 'Guest';
-    final profileImageUrl = userData?['profilePhoto'] as String? ?? user.photoURL!;
-    final coverPhotoUrl = (userData?['coverPhoto'] as String?)!;
+    final profileImageUrl = userData?['profilePhoto'] as String?;
+    final coverPhotoUrl = userData?['coverPhoto'] as String?;
     const double bgHeight = 150;
     const double avatarRadius = 25;
     const double overflow = avatarRadius; // how far it sticks out
+    const String defaultProfileImage = 'assets/profile/pfp.jpg';
+    const String defaultCoverImage = 'assets/profile/cover.jpg';
 
     return Stack(
       clipBehavior: Clip.none,
@@ -141,8 +143,13 @@ class ProfilePage extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(coverPhotoUrl),
+                  image: coverPhotoUrl != null && coverPhotoUrl.isNotEmpty
+                      ? NetworkImage(coverPhotoUrl) as ImageProvider<Object>
+                      : const AssetImage(defaultCoverImage),
                   fit: BoxFit.cover,
+                  onError: (exception, stackTrace) {
+                    debugPrint('Error loading cover image: $exception');
+                  },
                 ),
                 border: Border.all(color: colSpecial, width: 4),
               ),
@@ -168,7 +175,7 @@ class ProfilePage extends StatelessWidget {
         // Profile Picture with PopupMenu
         Positioned(
           right: 16,
-          bottom: 0,                // now flush with the new bottom
+          bottom: 0,          // now flush with the new bottom
           child: PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'edit') {
@@ -190,7 +197,12 @@ class ProfilePage extends StatelessWidget {
               ),
               child: CircleAvatar(
                 radius: avatarRadius,
-                backgroundImage: NetworkImage(profileImageUrl),
+                backgroundImage: profileImageUrl != null && profileImageUrl.isNotEmpty
+                    ? NetworkImage(profileImageUrl) as ImageProvider<Object>?
+                    : const AssetImage(defaultProfileImage),
+                onBackgroundImageError: (exception, stackTrace) {
+                  debugPrint('Error loading profile image: $exception');
+                },
               ),
             ),
           ),
