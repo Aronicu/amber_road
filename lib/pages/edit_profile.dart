@@ -143,6 +143,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'username': _usernameController.text.trim(),
         'profilePhoto': profilePhotoUrl,
         'coverPhoto': coverPhotoUrl,
+        'bio': _bioController.text.trim()
         // Using merge option to preserve other fields like isAuthor, isModerator, followers, etc.
       }, SetOptions(merge: true));
 
