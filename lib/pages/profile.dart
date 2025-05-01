@@ -6,6 +6,7 @@ import 'package:amber_road/widgets/book_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,6 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, authSnapshot) {
@@ -123,7 +123,8 @@ class ProfilePage extends StatelessWidget {
   Widget _buildProfileHeader(BuildContext context, DocumentSnapshot? userData) {
     final user = FirebaseAuth.instance.currentUser!;
     final username = userData?['username'] as String? ?? user.displayName ?? 'Guest';
-    final profileImageUrl = user.photoURL!;
+    final profileImageUrl = userData?['profilePhoto'] as String? ?? user.photoURL!;
+    final coverPhotoUrl = (userData?['coverPhoto'] as String?)!;
     const double bgHeight = 150;
     const double avatarRadius = 25;
     const double overflow = avatarRadius; // how far it sticks out
@@ -140,10 +141,10 @@ class ProfilePage extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/background/pft.jpg'),
+                  image: NetworkImage(coverPhotoUrl),
                   fit: BoxFit.cover,
                 ),
-                border: Border.all(color: Colors.black, width: 1),
+                border: Border.all(color: colSpecial, width: 4),
               ),
             ),
             SizedBox(height: overflow), // reserve hit-test area
@@ -185,7 +186,7 @@ class ProfilePage extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 2),
+                border: Border.all(color: colSpecial, width: 2),
               ),
               child: CircleAvatar(
                 radius: avatarRadius,
