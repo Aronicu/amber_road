@@ -216,10 +216,12 @@ class ProfilePage extends StatelessWidget {
     final int followers = userData?['followers'] as int? ?? 0;
     final int following = userData?['following'] as int? ?? 0;
     final int coins = userData?['coins'] as int? ?? 0;
+    final String bio = userData?['bio'] as String? ?? 'No bio added yet.';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Followers and Following stats
           Row(
@@ -300,6 +302,32 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          // Bio section
+          const Text(
+            'Bio',
+            style: TextStyle(
+              color: colPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              bio,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
           ),
         ],
       ),
