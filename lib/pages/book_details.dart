@@ -19,6 +19,30 @@ class _BookDetailsState extends State<BookDetailsPage> {
   bool _isDescriptionExpanded = false;
   // State for expandable details
   bool _isDetailsExpanded = false;
+  // State for library status
+  bool _isInLibrary = false;
+
+  // Show a success snackbar
+  void _showSuccessAlert(bool added) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          added ? 'Added to library' : 'Removed from library',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: colSpecial,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +68,23 @@ class _BookDetailsState extends State<BookDetailsPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          actions: [
+            // Add to Library button
+            IconButton(
+              icon: Icon(
+                _isInLibrary ? Icons.bookmark : Icons.bookmark_border,
+                color: colSpecial,
+              ),
+              tooltip: _isInLibrary ? 'Remove from Library' : 'Add to Library',
+              onPressed: () {
+                setState(() {
+                  _isInLibrary = !_isInLibrary;
+                  _showSuccessAlert(_isInLibrary);
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -54,6 +95,23 @@ class _BookDetailsState extends State<BookDetailsPage> {
               _buildDetailSection(context, widget.book),
               _buildChapters(context),
             ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            setState(() {
+              _isInLibrary = !_isInLibrary;
+              _showSuccessAlert(_isInLibrary);
+            });
+          },
+          backgroundColor: colSpecial,
+          icon: Icon(
+            _isInLibrary ? Icons.bookmark : Icons.bookmark_add,
+            color: Colors.white,
+          ),
+          label: Text(
+            _isInLibrary ? 'In Library' : 'Add to Library',
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ),
