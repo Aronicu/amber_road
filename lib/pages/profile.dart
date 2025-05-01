@@ -6,6 +6,7 @@ import 'package:amber_road/widgets/book_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 
@@ -170,7 +171,8 @@ class ProfilePage extends StatelessWidget {
           child: PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'edit') {
-                // TODO: Navigate to Edit Profile page
+                final currentRoute = GoRouterState.of(context).matchedLocation;
+                context.go("/editProfile", extra: currentRoute);
               } else if (value == 'logout') {
                 final provider = Provider.of<GoogleSigninProvider>(context, listen: false);
                 provider.logout();

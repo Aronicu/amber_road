@@ -1,6 +1,7 @@
 import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/pages/book_details.dart';
+import 'package:amber_road/pages/edit_profile.dart';
 import 'package:amber_road/pages/library.dart';
 import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
@@ -86,6 +87,14 @@ class AppNavigation {
 
         return BookDetailsPage(book: book, fromRoute: fromRoute,);
       }),
+
+      GoRoute(path: "/editProfile", name: "editProfile", builder: (context, state) {
+        final fromRoute = state.extra != null && state.extra is String 
+          ? state.extra as String 
+          : '/store';
+
+        return EditProfilePage(fromRoute: fromRoute);
+      },)
   ]);
 }
 
