@@ -70,6 +70,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           // You might want to store coverPhoto URL in Firestore as well
           // This is assuming you've added a coverPhoto field to your schema
           _currentCoverPhotoUrl = userData['coverPhoto'];
+
+          _bioController.text = userData['bio'] ?? '';
         });
       }
     } catch (e) {
@@ -134,9 +136,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
       
       // Get existing data to preserve other fields
-      final DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
-      final Map<String, dynamic> existingData = 
-          userDoc.exists ? (userDoc.data() as Map<String, dynamic>) : {};
+      // final DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+      // final Map<String, dynamic> existingData = 
+      //     userDoc.exists ? (userDoc.data() as Map<String, dynamic>) : {};
       
       // Update user data - only updating fields editable from this page
       await _firestore.collection('users').doc(uid).set({
