@@ -141,3 +141,76 @@ class CoverView extends StatelessWidget {
   }
 
 }
+
+class LibraryCoverView extends StatelessWidget {
+  const LibraryCoverView({super.key, required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        final currentRoute = GoRouterState.of(context).matchedLocation;
+        context.go('/book/${book.id}', extra: currentRoute);
+      },
+      child: Stack(
+        children: [
+          // Cover Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: AspectRatio(
+              aspectRatio: 2/3,
+              child: book.cover,
+            ),
+          ),
+          
+          // Gradient overlay for better text visibility
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.center,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    stops: const [0.6, 0.8, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          // Title
+          Positioned(
+            left: 8,
+            right: 8,
+            bottom: 8,
+            child: Text(
+              book.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    offset: Offset(1, 1),
+                    blurRadius: 3,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
