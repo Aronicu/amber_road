@@ -1,5 +1,6 @@
 import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
+import 'package:amber_road/pages/author_center.dart';
 import 'package:amber_road/pages/book_details.dart';
 import 'package:amber_road/pages/edit_profile.dart';
 import 'package:amber_road/pages/library.dart';
@@ -94,6 +95,12 @@ class AppNavigation {
           : '/store';
 
         return EditProfilePage(fromRoute: fromRoute);
+      },),
+      GoRoute(path: "/authorCenter", name: "authorCenter", builder: (context, state) {
+        final fromRoute = state.extra != null && state.extra is String 
+          ? state.extra as String 
+          : '/store';
+        return AuthorCenterPage(fromRoute: fromRoute,);
       },)
   ]);
 }

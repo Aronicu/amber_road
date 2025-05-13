@@ -39,7 +39,7 @@ class ProfilePage extends StatelessWidget {
                         _buildProfileHeader(context, userData),
                         _buildStatsSection(userData),
                         _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
-                        _buildAuthorCenterButton(),
+                        _buildAuthorCenterButton(context),
                       ],
                     );
                   } else {
@@ -48,7 +48,7 @@ class ProfilePage extends StatelessWidget {
                         _buildProfileHeader(context, null), 
                         _buildStatsSection(null),
                         _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
-                        _buildAuthorCenterButton(),
+                        _buildAuthorCenterButton(context),
                         const Center(child: Text("User data not found in Firestore.")),
                       ],
                     );
@@ -61,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                   _buildProfileHeader(context, null),
                   _buildStatsSection(null),
                   _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
-                  _buildAuthorCenterButton(),
+                  _buildAuthorCenterButton(context),
                   const Center(child: Text("No user logged in.")),
                 ],
               );
@@ -334,7 +334,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthorCenterButton() {
+  Widget _buildAuthorCenterButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: SizedBox(
@@ -348,7 +348,8 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           onPressed: () {
-            // TODO: Add your button action here
+            final currentRoute = GoRouterState.of(context).matchedLocation;
+            context.go("/authorCenter", extra: currentRoute);
           },
           child: const Text(
             'Author Center',
