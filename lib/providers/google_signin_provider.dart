@@ -12,24 +12,29 @@ class GoogleSigninProvider extends ChangeNotifier {
   GoogleSignInAccount get user => _user!;
 
   Future googleLogIn() async {
-    final googleUser = await googleSignIn.signIn();
-    if (googleUser == null) return;
-    _user = googleUser;
+    try {
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return;
+      _user = googleUser;
 
-    final googleAuth = await googleUser.authentication;
+      final googleAuth = await googleUser.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken
-    );
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken
+      );
 
-    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    final User? u = userCredential.user;
-    if (u != null) {
-      await createUserDocument(u, user.displayName!, user.photoUrl!);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? u = userCredential.user;
+      if (u != null) {
+        await createUserDocument(u, user.displayName!, user.photoUrl!);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Fucking error $e");
     }
-
-    notifyListeners();
+    
   }
 
   Future logout() async {

@@ -24,7 +24,7 @@ class Book {
     }
   );
 
-  int id;
+  String id;
   Image cover;
   String name;
   String author;

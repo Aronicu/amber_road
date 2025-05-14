@@ -11,7 +11,7 @@ class Chapter {
   );
   int id;
   int chapterNum;
-  int bookId;
+  String bookId;
   bool isDownloaded;
   bool isFinished;
   bool isPurchased;

@@ -34,13 +34,15 @@ class ProfilePage extends StatelessWidget {
                     return Center(child: Text("Error loading user data: ${firestoreSnapshot.error}"));
                   } else if (firestoreSnapshot.hasData && firestoreSnapshot.data!.exists) {
                     final userData = firestoreSnapshot.data!;
-                    return Column(
-                      children: [
-                        _buildProfileHeader(context, userData),
-                        _buildStatsSection(userData),
-                        _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
-                        _buildAuthorCenterButton(context),
-                      ],
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildProfileHeader(context, userData),
+                          _buildStatsSection(userData),
+                          _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
+                          _buildAuthorCenterButton(context),
+                        ],
+                      ),
                     );
                   } else {
                     return Column(
@@ -62,7 +64,6 @@ class ProfilePage extends StatelessWidget {
                   _buildStatsSection(null),
                   _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                   _buildAuthorCenterButton(context),
-                  const Center(child: Text("No user logged in.")),
                 ],
               );
             }
