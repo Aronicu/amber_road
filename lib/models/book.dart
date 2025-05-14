@@ -19,6 +19,7 @@ class Book {
       this.rating = 3.35,
       this.saves = 16000,
       this.chapters = 0,
+      this.isPublic = true,
       this.views,
     }
   );
@@ -35,5 +36,6 @@ class Book {
   double rating;
   int saves;
   String? views;
+  bool isPublic;
   int chapters;
 }

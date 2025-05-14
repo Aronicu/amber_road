@@ -72,7 +72,7 @@ class EmptyWorksView extends StatelessWidget {
           Icon(
             Icons.book_outlined,
             size: 100,
-            color: colPrimary.withOpacity(0.5),
+            color: colPrimary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 24),
           // Message
@@ -245,7 +245,7 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
           style: const TextStyle(color: colPrimary),
           decoration: InputDecoration(
             hintText: 'Enter the title of your work',
-            hintStyle: TextStyle(color: colPrimary.withOpacity(0.5)),
+            hintStyle: TextStyle(color: colPrimary.withValues(alpha: 0.5)),
             filled: true,
             fillColor: Colors.grey[800],
             border: OutlineInputBorder(
@@ -412,16 +412,16 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
             });
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+            backgroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return colSpecial;
                 }
                 return Colors.grey[800]!;
               },
             ),
-            foregroundColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+            foregroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
                 return colPrimary;
               },
             ),
@@ -448,17 +448,17 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
           children: [
             SwitchTheme(
               data: SwitchThemeData(
-                thumbColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
+                thumbColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
                       return colSpecial;
                     }
                     return Colors.grey;
                   },
                 ),
-                trackColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
+                trackColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
                       return colSpecial.withOpacity(0.5);
                     }
                     return Colors.grey.withOpacity(0.5);
@@ -510,7 +510,7 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
           style: const TextStyle(color: colPrimary),
           decoration: InputDecoration(
             hintText: 'Enter a description for your work...',
-            hintStyle: TextStyle(color: colPrimary.withOpacity(0.5)),
+            hintStyle: TextStyle(color: colPrimary.withValues(alpha: 0.5)),
             filled: true,
             fillColor: Colors.grey[800],
             border: OutlineInputBorder(
@@ -654,7 +654,7 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
               selectedColor: colSpecial,
               checkmarkColor: colPrimary,
               labelStyle: TextStyle(
-                color: isSelected ? colPrimary : colPrimary.withOpacity(0.7),
+                color: isSelected ? colPrimary : colPrimary.withValues(alpha: 0.5),
               ),
             );
           }).toList(),
