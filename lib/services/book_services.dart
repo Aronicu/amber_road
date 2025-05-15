@@ -242,7 +242,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',
@@ -298,7 +298,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',
@@ -340,7 +340,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',
@@ -384,7 +384,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',
@@ -423,7 +423,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',
@@ -465,7 +465,7 @@ class BookService {
           books.add(Book(
             coverImage,
             doc.id,
-            name: data['title'] ?? 'Untitled',
+            name: data['name'] ?? 'Untitled',
             author: data['authorName'] ?? 'Unknown',
             artist: data['artistName'] ?? 'Unknown',
             description: data['description'] ?? 'No description',

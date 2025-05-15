@@ -1,13 +1,15 @@
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/models/chapter.dart';
+import 'package:amber_road/services/book_services.dart';
+import 'package:amber_road/services/chapter_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class BookDetailsPage extends StatefulWidget {
-  const BookDetailsPage({super.key, required this.book, this.fromRoute = '/store'});
+  const BookDetailsPage({super.key, required this.bookId, this.fromRoute = '/store'});
 
-  final Book book;
+  final String bookId;
   final String fromRoute;
 
   @override
@@ -51,69 +53,101 @@ class _BookDetailsState extends State<BookDetailsPage> {
       onPopInvokedWithResult: (didPop, result) {
         context.go(widget.fromRoute);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              context.go(widget.fromRoute);
-            },
-          ),
-          title: Text(
-            widget.book.name,
-            style: TextStyle(
-              color: colPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          actions: [
-            // Add to Library button
-            IconButton(
-              icon: Icon(
-                _isInLibrary ? Icons.bookmark : Icons.bookmark_border,
-                color: colSpecial,
+      child: FutureBuilder<Book?>(
+        future: BookService().getBook(widget.bookId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Error loading books: ${snapshot.error}');
+          } else if (!snapshot.hasData) {
+            return const Scaffold(
+              body: Center(child: Text("No Book Found"),),
+            );
+          }
+
+          final book = snapshot.data!;
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  context.go(widget.fromRoute);
+                },
               ),
-              tooltip: _isInLibrary ? 'Remove from Library' : 'Add to Library',
+              title: Text(
+                book.name,
+                style: TextStyle(
+                  color: colPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                // Add to Library button
+                IconButton(
+                  icon: Icon(
+                    _isInLibrary ? Icons.bookmark : Icons.bookmark_border,
+                    color: colSpecial,
+                  ),
+                  tooltip: _isInLibrary ? 'Remove from Library' : 'Add to Library',
+                  onPressed: () {
+                    setState(() {
+                      _isInLibrary = !_isInLibrary;
+                      _showSuccessAlert(_isInLibrary);
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildHeader(context, book),
+                  _buildDescription(context, book),
+                  _buildDetailSection(context, book),
+                  FutureBuilder<List<Chapter>>(
+                    future: ChapterService().getBookChapters(bookId: widget.bookId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Text('Error loading chapters: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Scaffold(
+                          body: Center(child: Text("No Chapters Found"),),
+                        );
+                      }
+
+                      final chapters = snapshot.data!;
+                      return _buildChapters(chapters, context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 setState(() {
                   _isInLibrary = !_isInLibrary;
                   _showSuccessAlert(_isInLibrary);
                 });
               },
+              backgroundColor: colSpecial,
+              icon: Icon(
+                _isInLibrary ? Icons.bookmark : Icons.bookmark_add,
+                color: Colors.white,
+              ),
+              label: Text(
+                _isInLibrary ? 'In Library' : 'Add to Library',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildHeader(context, widget.book),
-              _buildDescription(context, widget.book),
-              _buildDetailSection(context, widget.book),
-              _buildChapters(context),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            setState(() {
-              _isInLibrary = !_isInLibrary;
-              _showSuccessAlert(_isInLibrary);
-            });
-          },
-          backgroundColor: colSpecial,
-          icon: Icon(
-            _isInLibrary ? Icons.bookmark : Icons.bookmark_add,
-            color: Colors.white,
-          ),
-          label: Text(
-            _isInLibrary ? 'In Library' : 'Add to Library',
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -430,52 +464,35 @@ class _BookDetailsState extends State<BookDetailsPage> {
     );
   }
 
-  Widget _buildChapters(BuildContext context) {
-  //   final theme = Theme.of(context);
-  //   // Get the background color from theme and darken it slightly
-  //   final backgroundColor = theme.colorScheme.surface.withValues(alpha: 0.7);
-  //   final textColor = theme.colorScheme.onSurface;
-
-  //   List<Chapter> chapters = [];
-  //   for (int i = 1; i <= widget.book.chapters; i++) {
-  //     // Make some chapters have different statuses for demonstration
-  //     bool isFinished = i <= widget.book.chapters * 0.3; // First 30% are finished
-  //     bool isDownloaded = i <= widget.book.chapters * 0.5 && !isFinished; // Next 20% are downloaded
-  //     bool isPurchased = i <= widget.book.chapters * 0.7 && !isFinished && !isDownloaded; // Next 20% are purchased
-      
-  //     chapters.add(Chapter(
-  //       i, // id
-  //       i, // chapterNum
-  //       widget.book.id,
-  //       isFinished: isFinished,
-  //       isDownloaded: isDownloaded,
-  //       isPurchased: isPurchased,
-  //     ));
-  //   }
+  Widget _buildChapters(List<Chapter> chapters, BuildContext context) {
+    final theme = Theme.of(context);
+    // Get the background color from theme and darken it slightly
+    final backgroundColor = theme.colorScheme.surface.withValues(alpha: 0.7);
+    final textColor = theme.colorScheme.onSurface;
     
-  //   return Container(
-  //     color: backgroundColor,
-  //     padding: EdgeInsets.symmetric(vertical: 16.0),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Padding(
-  //           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-  //           child: Text(
-  //             'Chapters',
-  //             style: TextStyle(
-  //               fontSize: 18.0,
-  //               fontWeight: FontWeight.bold,
-  //               color: textColor,
-  //             ),
-  //           ),
-  //         ),
-  //         // Sort chapters in descending order (newest first)
-  //         ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter)),
-  //       ],
-  //     ),
-  //   );
-    return Center(child: Text("There are not Chapters Yet"),);
+    return Container(
+      color: backgroundColor,
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              'Chapters',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+          ),
+          // Sort chapters in descending order (newest first)
+          ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter)),
+        ],
+      ),
+    );
+    // return Center(child: Text("There are not Chapters Yet"),);
   }
 
   Widget _buildChapterItem(BuildContext context, Chapter chapter) {
@@ -512,8 +529,8 @@ class _BookDetailsState extends State<BookDetailsPage> {
       children: [
         InkWell(
           onTap: () {
-            // Handle chapter tap
-            // You can navigate to chapter reading page here
+            final currentRoute = GoRouterState.of(context).matchedLocation;
+            context.go('/book/${widget.bookId}/${chapter.id}', extra: currentRoute);
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

@@ -3,6 +3,7 @@ import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/pages/author_center/add_chapter_page.dart';
 import 'package:amber_road/pages/author_center/author_center.dart';
 import 'package:amber_road/pages/book_details.dart';
+import 'package:amber_road/pages/chapter_detail_page.dart';
 import 'package:amber_road/pages/edit_profile.dart';
 import 'package:amber_road/pages/library.dart';
 import 'package:amber_road/pages/author_center/manage_work_page.dart';
@@ -10,6 +11,7 @@ import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
 import 'package:amber_road/pages/updates.dart';
 import 'package:amber_road/providers/google_signin_provider.dart';
+import 'package:amber_road/services/book_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -81,14 +83,25 @@ class AppNavigation {
       GoRoute(path: "/book/:id", name: "bookDetails", builder: (context, state) {
         final bookId = state.pathParameters['id']!;
 
-        final book = getBookByID(bookId);
+        // Get the referring route from extra data if available
+        final fromRoute = state.extra != null && state.extra is String 
+            ? state.extra as String 
+            : '/store';
+
+        return BookDetailsPage(bookId: bookId, fromRoute: fromRoute,);
+      }),
+
+      //book/${widget.bookId}/${chapter.id}
+      GoRoute(path: "/book/:id/:cid", name: "viewChapter", builder: (context, state) {
+        final bookId = state.pathParameters['id']!;
+        final chapterId = state.pathParameters['cid']!;
 
         // Get the referring route from extra data if available
         final fromRoute = state.extra != null && state.extra is String 
             ? state.extra as String 
             : '/store';
 
-        return BookDetailsPage(book: book, fromRoute: fromRoute,);
+        return ChapterDetailPage(bookId: bookId, chapterId: chapterId, fromRoute: fromRoute);
       }),
 
       GoRoute(path: "/editProfile", name: "editProfile", builder: (context, state) {

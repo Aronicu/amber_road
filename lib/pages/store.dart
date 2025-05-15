@@ -1,6 +1,7 @@
 import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
+import 'package:amber_road/services/book_services.dart';
 import 'package:amber_road/widgets/book_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -39,14 +40,7 @@ class StorePage extends StatelessWidget {
             SizedBox(height: 15),
 
             // TODO Book doesn't need to be there I think
-            _latestUpdates([
-              farmingLifeInAnotherWorld,
-              brainrotGF,
-              theNovelsExtra,
-              theExtrasAcademySurvivalGuide,
-              makeine,
-              theFragrantFlowerBloomsWithDignity,
-            ]),
+            _latestUpdates(),
             SizedBox(height: 15),
             _staffPick([
               brainrotGF,
@@ -161,24 +155,39 @@ class StorePage extends StatelessWidget {
     );
   }
   
-  Widget _latestUpdates(List<Book> books) {
-    return Padding(
-      padding: EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-            Text("Latest Updates", style: TextStyle(
-              color: colPrimary,
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
-            ),),
+  Widget _latestUpdates() {
+    return FutureBuilder<List<Book?>>(
+      future: BookService().getRecentBooks(limit: 6),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Text('Error loading books: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Text('No recent books found');
+        }
 
-            SizedBox(height: 8),
+        final books = snapshot.data!;
 
-            for (final b in books)
-            BookView(book: b)
-        ],
-      ),
+        return Padding(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                Text("Latest Updates", style: TextStyle(
+                  color: colPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30,
+                ),),
+        
+                SizedBox(height: 8),
+        
+                for (final b in books)
+                  BookView(book: b!)
+            ],
+          ),
+        );
+      }
     );
   }
   

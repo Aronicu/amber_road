@@ -162,21 +162,25 @@ class _ChapterDetailPageState extends State<ChapterDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_chapter?.title ?? 'Chapter'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(widget.fromRoute),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) => context.go(widget.fromRoute),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_chapter?.title ?? 'Chapter'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go(widget.fromRoute),
+          ),
         ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _chapter == null
+                ? const Center(child: Text('Chapter not found'))
+                : _chapter!.contentType == ChapterContentType.text
+                    ? _buildTextViewer()
+                    : _buildImageViewer(),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _chapter == null
-              ? const Center(child: Text('Chapter not found'))
-              : _chapter!.contentType == ChapterContentType.text
-                  ? _buildTextViewer()
-                  : _buildImageViewer(),
     );
   }
 }
