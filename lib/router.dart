@@ -4,6 +4,7 @@ import 'package:amber_road/pages/author_center.dart';
 import 'package:amber_road/pages/book_details.dart';
 import 'package:amber_road/pages/edit_profile.dart';
 import 'package:amber_road/pages/library.dart';
+import 'package:amber_road/pages/manage_work_page.dart';
 import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
 import 'package:amber_road/pages/updates.dart';
@@ -77,7 +78,7 @@ class AppNavigation {
       ),
       
       GoRoute(path: "/book/:id", name: "bookDetails", builder: (context, state) {
-        final bookId = int.parse(state.pathParameters['id']!);
+        final bookId = state.pathParameters['id']!;
 
         final book = getBookByID(bookId);
 
@@ -101,6 +102,13 @@ class AppNavigation {
           ? state.extra as String 
           : '/store';
         return AuthorCenterPage(fromRoute: fromRoute,);
+      },),
+      GoRoute(path: "/manageBook/:id", name: "manageBook", builder: (context, state) {
+        final bookId = state.pathParameters['id']!;
+        final fromRoute = state.extra != null && state.extra is String 
+          ? state.extra as String 
+          : '/store';
+        return BookManagementPage(bookId: bookId, fromRoute: fromRoute,);
       },)
   ]);
 }

@@ -21,6 +21,7 @@ class Book {
       this.chapters = 0,
       this.isPublic = true,
       this.views,
+      this.pricePerChapter = 0
     }
   );
 
@@ -38,4 +39,5 @@ class Book {
   String? views;
   bool isPublic;
   int chapters;
+  double pricePerChapter;
 }

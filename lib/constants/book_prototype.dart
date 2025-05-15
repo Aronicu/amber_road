@@ -1,9 +1,8 @@
 import 'package:amber_road/models/book.dart';
 import 'package:flutter/material.dart';
-
 final Book girlsxvampire = Book(
   Image.asset("assets/girlsxvampire/cover.jpg", fit: BoxFit.cover,),
-  0,
+  "00000000-0000-0000-0000-000000000000",
   name: "Girls X Vampire",
   author: "Mikami Teren",
   artist: "Chigusa Minori",
@@ -15,7 +14,7 @@ final Book girlsxvampire = Book(
 
 final Book makeine = Book(
   Image.asset("assets/makeine/cover.jpg", fit: BoxFit.cover,),
-  1,
+  "00000000-0000-0000-0000-000000000001",
   name: "Too Many Losing Heroines",
   author: "Takibi Amamori",
   artist: "Imigimuru",
@@ -24,18 +23,18 @@ final Book makeine = Book(
   format: BookFormat.webnovel,
   chapters: 21,
   description: r"""
-“Huh? Who are you calling losing?”
+"Huh? Who are you calling losing?"
 
 Background character Nukumizu Kazuhiko witnesses a popular girl, Yanami Anna, getting rejected by another guy.
 
-“Even though he said we'll get married. Don't you think he's pretty mean?”
-“When did he say that?”
-“When we were 4 or 5 years old.”
+"Even though he said we'll get married. Don't you think he's pretty mean?"
+"When did he say that?"
+"When we were 4 or 5 years old."
 
 Nukumizu has no choice but to comfort Yanami, but this leads him to get involved with other losing heroines like Yakishio Lemon from the Track and Field Club and Chika Komari from the Literature Club.
 
-“Nukumizu-kun. There are two types of girls. Childhood friends or cheating cats.”
-“I see. Well, that's a bold statement.”
+"Nukumizu-kun. There are two types of girls. Childhood friends or cheating cats."
+"I see. Well, that's a bold statement."
 
 Bless these girls who only shine after they lose.
   """
@@ -43,7 +42,7 @@ Bless these girls who only shine after they lose.
 
 final Book theNovelsExtra = Book(
   Image.asset("assets/theNovelsExtra/cover.jpg", fit: BoxFit.cover,),
-  2,
+  "00000000-0000-0000-0000-000000000002",
   name: "The Novel's Extra",
   author: "Jee Gab Song",
   artist: "CarroToon",
@@ -52,17 +51,17 @@ final Book theNovelsExtra = Book(
   format: BookFormat.webtoon,
   chapters: 124,
   description: r"""
-Wouldn’t it be a dream to wake up in a world of your own creation? For Kim Hajin, it’s nothing short of a nightmare.
+Wouldn't it be a dream to wake up in a world of your own creation? For Kim Hajin, it's nothing short of a nightmare.
 
-With no clue how or why he’s been transported into his web novel — as a mere extra, no less! — Hajin has little choice but to see his story through until the end. Lucky for him, as the author, he knows this perilous world like the back of his hand.
+With no clue how or why he's been transported into his web novel — as a mere extra, no less! — Hajin has little choice but to see his story through until the end. Lucky for him, as the author, he knows this perilous world like the back of his hand.
 
-But when discrepancies in the plot begin popping up left and right, Hajin soon realizes that things aren’t quite so simple, after all…
+But when discrepancies in the plot begin popping up left and right, Hajin soon realizes that things aren't quite so simple, after all…
 """
 );
 
 final Book brainrotGF = Book(
   Image.asset("assets/brainrotGF/cover.jpg", fit: BoxFit.cover,),
-  3,
+  "00000000-0000-0000-0000-000000000003",
   name: "Brainrot GF",
   author: "Senukin",
   artist: "Senukin",
@@ -77,7 +76,7 @@ Brainrot translation: shes skibidi shes toilet shes roblox she girl math goat bu
 
 final Book theFragrantFlowerBloomsWithDignity = Book(
   Image.asset("assets/theFragrantFlowerBloomsWithDignity/cover.jpg", fit: BoxFit.cover,),
-  4,
+  "00000000-0000-0000-0000-000000000004",
   name: "The Fragrant Flower Blooms with Dignity",
   author: "Mikami Saka",
   artist: "Mikami Saka",
@@ -92,7 +91,7 @@ In a certain place, there are two neighboring high schools. Chidori High School,
 
 final Book threeSixtyFiveDaysToTheWedding = Book(
   Image.asset("assets/threeSixtyFiveDaysToTheWedding/cover.jpg", fit: BoxFit.cover,),
-  5,
+  "00000000-0000-0000-0000-000000000005",
   name: "365 Days to the Wedding",
   author: "Wakami Tamiki",
   artist: "Wakami Tamiki",
@@ -105,7 +104,7 @@ final Book threeSixtyFiveDaysToTheWedding = Book(
 
 final Book farmingLifeInAnotherWorld = Book(
   Image.asset("assets/farmingLifeInAnotherWorld/cover.jpg", fit: BoxFit.cover,),
-  6,
+  "00000000-0000-0000-0000-000000000006",
   name: "Farming Life in Another World",
   author: "Naitou Kinosuke",
   artist: "Tsurugi Yasuyuki",
@@ -118,7 +117,7 @@ final Book farmingLifeInAnotherWorld = Book(
 
 final Book theExtrasAcademySurvivalGuide = Book(
   Image.asset("assets/theExtrasAcademySurvivalGuide/cover.jpg", fit: BoxFit.cover,),
-  7,
+  "00000000-0000-0000-0000-000000000007",
   name: "The Extra's Academy Survival Guide",
   author: "Korita",
   artist: "Green Kyrin",
@@ -137,7 +136,7 @@ Can Ed help the story progress while staying out of the limelight?
 
 final Book soloLeveling = Book(
   Image.asset("assets/soloLeveling/cover.jpg", fit: BoxFit.cover,),
-  8,
+  "00000000-0000-0000-0000-000000000008",
   name: "Solo Leveling",
   author: "Chugong",
   artist: "REDICE Studio",
@@ -145,12 +144,12 @@ final Book soloLeveling = Book(
   themes: ["Magic", "Monsters", "Supernatural"],
   format: BookFormat.webtoon,
   chapters: 200,
-  description: "10 years ago, after “the Gate” that connected the real world with the monster world opened, some of the ordinary, everyday people received the power to hunt monsters within the Gate. They are known as “Hunters”. However, not all Hunters are powerful. My name is Sung Jin-Woo, an E-rank Hunter. I’m someone who has to risk his life in the lowliest of dungeons, the “World’s Weakest”. Having no skills whatsoever to display, I barely earned the required money by fighting in low-leveled dungeons… at least until I found a hidden dungeon with the hardest difficulty within the D-rank dungeons! In the end, as I was accepting death, I suddenly received a strange power, a quest log that only I could see, a secret to leveling up that only I know about! If I trained in accordance with my quests and hunted monsters, my level would rise. Changing from the weakest Hunter to the strongest S-rank Hunter!"
+  description: "10 years ago, after \"the Gate\" that connected the real world with the monster world opened, some of the ordinary, everyday people received the power to hunt monsters within the Gate. They are known as \"Hunters\". However, not all Hunters are powerful. My name is Sung Jin-Woo, an E-rank Hunter. I'm someone who has to risk his life in the lowliest of dungeons, the \"World's Weakest\". Having no skills whatsoever to display, I barely earned the required money by fighting in low-leveled dungeons… at least until I found a hidden dungeon with the hardest difficulty within the D-rank dungeons! In the end, as I was accepting death, I suddenly received a strange power, a quest log that only I could see, a secret to leveling up that only I know about! If I trained in accordance with my quests and hunted monsters, my level would rise. Changing from the weakest Hunter to the strongest S-rank Hunter!"
 );
 
 final Book windBreaker = Book(
   Image.asset("assets/windBreaker/cover.jpg", fit: BoxFit.cover,),
-  9,
+  "00000000-0000-0000-0000-000000000009",
   name: "Wind Breaker",
   author: "Jo Yongseok",
   artist: "Jo Yongseok",
@@ -163,7 +162,7 @@ final Book windBreaker = Book(
 
 final Book myOlderSistersFriend = Book(
   Image.asset("assets/myOlderSistersFriend/cover.jpg", fit: BoxFit.cover,),
-  10,
+  "00000000-0000-0000-0000-000000000010",
   name: "My Older Sister's Friend",
   author: "Takase Waka",
   artist: "Takase Waka",
@@ -174,32 +173,28 @@ final Book myOlderSistersFriend = Book(
   description: "Hinako, a friend of Asahi's older sister, is a frequent guest at the home of the high school boy. She always misleads his mind with her suggestive attitude while treating him like a little brother... or rather, pet?"
 );
 
+// Map to store books by their string IDs for efficient lookup
+final Map<String, Book> _booksMap = {
+  "00000000-0000-0000-0000-000000000000": girlsxvampire,
+  "00000000-0000-0000-0000-000000000001": makeine,
+  "00000000-0000-0000-0000-000000000002": theNovelsExtra,
+  "00000000-0000-0000-0000-000000000003": brainrotGF,
+  "00000000-0000-0000-0000-000000000004": theFragrantFlowerBloomsWithDignity,
+  "00000000-0000-0000-0000-000000000005": threeSixtyFiveDaysToTheWedding,
+  "00000000-0000-0000-0000-000000000006": farmingLifeInAnotherWorld,
+  "00000000-0000-0000-0000-000000000007": theExtrasAcademySurvivalGuide,
+  "00000000-0000-0000-0000-000000000008": soloLeveling,
+  "00000000-0000-0000-0000-000000000009": windBreaker,
+  "00000000-0000-0000-0000-000000000010": myOlderSistersFriend,
+};
 
-Book getBookByID(int id) {
-  switch (id) {
-    case 0:
-      return girlsxvampire;
-    case 1:
-      return makeine;
-    case 2:
-      return theNovelsExtra;
-    case 3:
-      return brainrotGF;
-    case 4:
-      return theFragrantFlowerBloomsWithDignity;
-    case 5:
-      return threeSixtyFiveDaysToTheWedding;
-    case 6:
-      return farmingLifeInAnotherWorld;
-    case 7:
-      return theExtrasAcademySurvivalGuide;
-    case 8:
-      return soloLeveling;
-    case 9:
-      return windBreaker;
-    case 10:
-      return myOlderSistersFriend;
-  }
+// Function to get a book by its string ID
+Book getBookByID(String id) {
+  // Return the book if found in the map, otherwise return a default book
+  return _booksMap[id] ?? girlsxvampire;
+}
 
-  return girlsxvampire;
+// Optional: Function to get all books as a list
+List<Book> getAllBooks() {
+  return _booksMap.values.toList();
 }

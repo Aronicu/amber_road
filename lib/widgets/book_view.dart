@@ -139,7 +139,6 @@ class CoverView extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class LibraryCoverView extends StatelessWidget {
@@ -210,6 +209,90 @@ class LibraryCoverView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AuthorCoverView extends StatelessWidget {
+  const AuthorCoverView({super.key, required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final cover = book.cover;
+    final name = book.name;
+
+    return GestureDetector(
+      onTap: () {
+        // Changed to navigate to manageBook route
+        final currentRoute = GoRouterState.of(context).matchedLocation;
+        context.go('/manageBook/${book.id}', extra: currentRoute);
+      },
+      child: Container(
+        width: 120,
+        padding: const EdgeInsets.only(right: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Added a management badge overlay
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: AspectRatio(
+                    aspectRatio: 2/3,
+                    child: cover,
+                  ),
+                ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Manage',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 112,
+              child: Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: colPrimary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            // Added status information
+            const SizedBox(height: 4),
+            Text(
+              '${book.chapters} Chapters',
+              style: TextStyle(
+                fontSize: 12,
+                color: colPrimary.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

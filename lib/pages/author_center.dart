@@ -1,6 +1,9 @@
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/pages/create_work_page.dart';
+import 'package:amber_road/widgets/book_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,15 +48,135 @@ class AuthorCenterContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // List of books by the author (for now empty)
-    final List<Book> authorWorks = [];
+    final currentUser = FirebaseAuth.instance.currentUser;
+    
+    if (currentUser == null) {
+      return const Center(
+        child: Text('Please login to view your works', 
+               style: TextStyle(color: colPrimary)),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: authorWorks.isEmpty
-          ? const EmptyWorksView()
-          : const Text('Your works will appear here', 
-              style: TextStyle(color: colPrimary)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Create Work Button
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CreateWorkPage(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colSpecial,
+              foregroundColor: colPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add),
+                SizedBox(width: 8),
+                Text(
+                  'Create Work',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUser.uid)
+                .collection('books')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+              builder: (context, userBooksSnapshot) {
+                // ... rest of the existing stream builder code
+                // Keep all the existing error handling and grid building logic here
+                if (userBooksSnapshot.hasError) {
+                  return Center(child: Text('Error: ${userBooksSnapshot.error}'));
+                }
+
+                if (userBooksSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final bookIds = userBooksSnapshot.data!.docs
+                    .map((doc) => doc.id)
+                    .toList();
+
+                if (bookIds.isEmpty) return const EmptyWorksView();
+
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('books')
+                      .where(FieldPath.documentId, whereIn: bookIds)
+                      .snapshots(),
+                  builder: (context, booksSnapshot) {
+                    // ... existing book processing logic
+                    if (booksSnapshot.hasError) {
+                      return Center(child: Text('Error loading books: ${booksSnapshot.error}'));
+                    }
+
+                    if (!booksSnapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final books = booksSnapshot.data!.docs.map((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      return Book(
+                        Image.network(data['coverUrl'], fit: BoxFit.cover),
+                        doc.id,
+                        name: data['name'],
+                        author: data['authorName'],
+                        artist: data['artistName'],
+                        description: data['description'],
+                        genres: List<String>.from(data['genres']),
+                        themes: List<String>.from(data['themes']),
+                        format: BookFormat.values.firstWhere(
+                          (f) => f.toString().split('.').last == data['format'],
+                        ),
+                        pricePerChapter: data['pricePerChapter']?.toDouble() ?? 0.0,
+                        isPublic: data['isPublic'] ?? false,
+                        chapters: data['chapters']?.toInt() ?? 0,
+                      );
+                    }).toList();
+
+                    return _buildWorksGrid(books);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Keep existing _buildWorksGrid method
+  Widget _buildWorksGrid(List<Book> books) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 0.6,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: books.length,
+      itemBuilder: (context, index) => AuthorCoverView(book: books[index]),
     );
   }
 }

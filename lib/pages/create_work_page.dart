@@ -5,6 +5,7 @@ import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/services/book_services.dart'; // Import our new service
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateWorkPage extends StatefulWidget {
@@ -31,6 +32,7 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
   final _descriptionController = TextEditingController();
   double _pricePerChapter = 0;
   final List<String> _selectedGenres = [];
+  final List<String> _selectedThemes = [];
   
   // Image picker placeholder
   File? _coverImageFile;
@@ -40,6 +42,12 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
   final List<String> _availableGenres = [
     'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror',
     'Mystery', 'Romance', 'Sci-Fi', 'Slice of Life', 'Sports', 'Thriller'
+  ];
+
+  final List<String> _availableThemes = [
+    'Coming of Age', 'School Life', 'Supernatural', 'Isekai', 
+    'Historical', 'Military', 'Psychological', 'Dystopian',
+    'Post-Apocalyptic', 'Cyberpunk', 'Magical Realism', 'Time Travel'
   ];
 
   @override
@@ -99,6 +107,10 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
                   // Genres selection
                   _buildGenresSelector(),
                   const SizedBox(height: 32),
+
+                  // Themes selection
+                  _buildThemesSelector(),
+                  const SizedBox(height: 32),
                   
                   // Submit button
                   _buildSubmitButton(),
@@ -106,6 +118,49 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
               ),
             ),
           ),
+    );
+  }
+
+  Widget _buildThemesSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Themes',
+          style: TextStyle(
+            color: colPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _availableThemes.map((theme) {
+            final isSelected = _selectedThemes.contains(theme);
+            return FilterChip(
+              label: Text(theme),
+              selected: isSelected,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedThemes.add(theme);
+                  } else {
+                    _selectedThemes.remove(theme);
+                  }
+                });
+              },
+              backgroundColor: Colors.grey[800],
+              selectedColor: colSpecial,
+              checkmarkColor: colPrimary,
+              labelStyle: TextStyle(
+                color: isSelected ? colPrimary : colPrimary.withOpacity(0.5),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -647,7 +702,7 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
           );
           
           // Navigate back with the created book
-          Navigator.pop(context, book);
+          context.go("/manageBook/${book.id}", extra: "/authorCenter");
         } else {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
