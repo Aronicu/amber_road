@@ -118,6 +118,15 @@ class AppNavigation {
           : '/store';
 
         return AddChapterPage(bookId: bookId, fromRoute: fromRoute,);
+      },),
+      GoRoute(path: "/editChapter/:bid/:cnum", name: "editChapter", builder: (context, state) {
+        final bookId = state.pathParameters['bid']!;
+        final chapterNum = int.parse(state.pathParameters['cnum']!);
+        final fromRoute = state.extra != null && state.extra is String 
+          ? state.extra as String 
+          : '/store';
+
+        return AddChapterPage(bookId: bookId, chapterNum: chapterNum, fromRoute: fromRoute,);
       },)
   ]);
 }

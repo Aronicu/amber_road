@@ -13,12 +13,12 @@ class AddChapterPage extends StatefulWidget {
     super.key, 
     required this.bookId, 
     this.fromRoute = "/store",
-    this.chapterId,
+    this.chapterNum,
   });
   
   final String bookId;
   final String fromRoute;
-  final String? chapterId; // If editing an existing chapter
+  final int? chapterNum; // If editing an existing chapter
 
   @override
   State<StatefulWidget> createState() => _AddChapterPageState();
@@ -72,10 +72,10 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
       }
       
       // If editing an existing chapter
-      if (widget.chapterId != null) {
-        final chapter = await _chapterService.getChapter(
+      if (widget.chapterNum != null) {
+        final chapter = await _chapterService.getChapterByChapNumber(
           bookId: widget.bookId,
-          chapterId: widget.chapterId!,
+          chapterNum: widget.chapterNum!,
         );
         
         if (chapter != null) {
@@ -140,7 +140,7 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
       }
       
       // Create or update the chapter
-      if (widget.chapterId == null) {
+      if (widget.chapterNum == null) {
         // Create new chapter
         if (isTextEditor) {
           await _chapterService.createTextChapter(
@@ -159,17 +159,18 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
         }
       } else {
         // Update existing chapter
+        final chap = await _chapterService.getChapterByChapNumber(bookId: widget.bookId, chapterNum: widget.chapterNum!);
         if (isTextEditor) {
           await _chapterService.updateTextChapter(
             bookId: widget.bookId,
-            chapterId: widget.chapterId!,
+            chapterId: chap!.id,
             title: _titleController.text,
             textContent: _textContentController.text,
           );
         } else {
           await _chapterService.updateImageChapter(
             bookId: widget.bookId,
-            chapterId: widget.chapterId!,
+            chapterId: chap!.id,
             title: _titleController.text,
             imageUrls: _existingImageUrls,
             newImages: _selectedImages,
@@ -406,7 +407,7 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.chapterId == null 
+          title: Text(widget.chapterNum == null 
               ? 'Add New Chapter' 
               : 'Edit Chapter'),
           leading: IconButton(

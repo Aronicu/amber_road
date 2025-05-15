@@ -182,6 +182,31 @@ class ChapterService {
       return null;
     }
   }
+
+  // Get a chapter by chapter number
+  Future<Chapter?> getChapterByChapNumber({
+    required String bookId,
+    required int chapterNum,
+  }) async {
+    try {
+      // Query chapters collection where chapterNumber equals the provided number
+      QuerySnapshot querySnapshot = await _getChaptersCollection(bookId)
+          .where('chapterNum', isEqualTo: chapterNum)
+          .limit(1)  // We only need one document
+          .get();
+      
+      // Check if any results were returned
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      }
+      
+      // Convert the first document to a Chapter object
+      return Chapter.fromFirestore(querySnapshot.docs.first);
+    } catch (e) {
+      print('Error getting chapter by number: $e');
+      return null;
+    }
+  }
   
   // Get all chapters for a book
   Future<List<Chapter>> getBookChapters({

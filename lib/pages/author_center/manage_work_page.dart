@@ -391,9 +391,10 @@ class _BookManagementState extends State<BookManagementPage> {
   Future<void> _editChapter(int chapterNumber) async {
     // Navigate to chapter edit page
     if (_editedBook == null) return;
+
+    final currentRoute = GoRouterState.of(context).matchedLocation;
     
-    // Replace with your actual navigation logic
-    context.go('/editChapter/$chapterNumber', extra: _editedBook);
+    context.go('/editChapter/${_editedBook!.id}/$chapterNumber', extra: currentRoute);
   }
 
   Future<void> _deleteChapter(int chapterNumber) async {
