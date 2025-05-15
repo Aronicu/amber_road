@@ -13,7 +13,7 @@ class BookView extends StatelessWidget {
     final cover = book.cover;
     final name = book.name;
     final author = book.author;
-    final chapters = book.chapters;
+    final chapters = book.chapterCount;
 
     final theme = Theme.of(context);
     final primaryColor = theme.primaryColor;
@@ -285,7 +285,7 @@ class AuthorCoverView extends StatelessWidget {
             // Added status information
             const SizedBox(height: 4),
             Text(
-              '${book.chapters} Chapters',
+              '${book.chapterCount} Chapters',
               style: TextStyle(
                 fontSize: 12,
                 color: colPrimary.withOpacity(0.7),

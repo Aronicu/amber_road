@@ -18,7 +18,7 @@ class Book {
       this.description = "No Description Provided",
       this.rating = 3.35,
       this.saves = 16000,
-      this.chapters = 0,
+      this.chapterCount = 0,
       this.isPublic = true,
       this.views,
       this.pricePerChapter = 0
@@ -38,6 +38,6 @@ class Book {
   int saves;
   String? views;
   bool isPublic;
-  int chapters;
+  int chapterCount;
   double pricePerChapter;
 }

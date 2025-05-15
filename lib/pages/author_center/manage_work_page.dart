@@ -264,7 +264,7 @@ class _BookManagementState extends State<BookManagementPage> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _editedBook!.chapters,
+      itemCount: _editedBook!.chapterCount,
       itemBuilder: (context, index) {
         return ListTile(
           title: Text('Chapter ${index + 1}'),

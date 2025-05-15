@@ -151,7 +151,7 @@ class AuthorCenterContent extends StatelessWidget {
                         ),
                         pricePerChapter: data['pricePerChapter']?.toDouble() ?? 0.0,
                         isPublic: data['isPublic'] ?? false,
-                        chapters: data['chapters']?.toInt() ?? 0,
+                        chapterCount: data['chaptersCount']?.toInt() ?? 0,
                       );
                     }).toList();
 
