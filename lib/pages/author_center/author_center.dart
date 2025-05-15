@@ -1,6 +1,6 @@
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
-import 'package:amber_road/pages/create_work_page.dart';
+import 'package:amber_road/pages/author_center/create_work_page.dart';
 import 'package:amber_road/widgets/book_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
