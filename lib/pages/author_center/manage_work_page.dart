@@ -393,7 +393,7 @@ class _BookManagementState extends State<BookManagementPage> {
     if (_editedBook == null) return;
     
     // Replace with your actual navigation logic
-    context.push('/editChapter/$chapterNumber', extra: _editedBook);
+    context.go('/editChapter/$chapterNumber', extra: _editedBook);
   }
 
   Future<void> _deleteChapter(int chapterNumber) async {
@@ -451,7 +451,8 @@ class _BookManagementState extends State<BookManagementPage> {
 
   void _navigateToAddChapter() {
     if (_editedBook == null) return;
-    context.push('/addChapter', extra: _editedBook);
+    final currentRoute = GoRouterState.of(context).matchedLocation;
+    context.go('/addChapter/${_editedBook!.id}', extra: currentRoute);
   }
 
   void _showError(String message) {

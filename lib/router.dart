@@ -1,10 +1,11 @@
 import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
-import 'package:amber_road/pages/author_center.dart';
+import 'package:amber_road/pages/author_center/add_chapter_page.dart';
+import 'package:amber_road/pages/author_center/author_center.dart';
 import 'package:amber_road/pages/book_details.dart';
 import 'package:amber_road/pages/edit_profile.dart';
 import 'package:amber_road/pages/library.dart';
-import 'package:amber_road/pages/manage_work_page.dart';
+import 'package:amber_road/pages/author_center/manage_work_page.dart';
 import 'package:amber_road/pages/profile.dart';
 import 'package:amber_road/pages/store.dart';
 import 'package:amber_road/pages/updates.dart';
@@ -109,6 +110,14 @@ class AppNavigation {
           ? state.extra as String 
           : '/store';
         return BookManagementPage(bookId: bookId, fromRoute: fromRoute,);
+      },),
+      GoRoute(path: "/addChapter/:id", name: "addChapter", builder: (context, state) {
+        final bookId = state.pathParameters['id']!;
+        final fromRoute = state.extra != null && state.extra is String 
+          ? state.extra as String 
+          : '/store';
+
+        return AddChapterPage(bookId: bookId, fromRoute: fromRoute,);
       },)
   ]);
 }

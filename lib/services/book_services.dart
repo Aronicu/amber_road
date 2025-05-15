@@ -165,7 +165,6 @@ class BookService {
     );
   }
 
-  // Add to BookService
   Future<Book?> getBook(String bookId) async {
     try {
       final doc = await _booksCollection.doc(bookId).get();
@@ -218,6 +217,398 @@ class BookService {
     } catch (e) {
       print('Error updating cover image: $e');
       throw Exception('Failed to update cover image');
+    }
+  }
+
+  // Get all books by current author
+  Future<List<Book>> getAuthorBooks() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+      
+      final querySnapshot = await _booksCollection
+          .where('authorId', isEqualTo: currentUser.uid)
+          .get();
+          
+      List<Book> books = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      return books;
+    } catch (e) {
+      throw Exception('Failed to load author books: $e');
+    }
+  }
+
+  // Parse BookFormat from string
+  BookFormat _parseBookFormat(String? format) {
+    switch (format) {
+      case 'manga':
+        return BookFormat.manga;
+      case 'webtoon':
+        return BookFormat.webtoon;
+      case 'webnovel':
+        return BookFormat.webnovel;
+      default:
+        return BookFormat.manga;
+    }
+  }
+
+  // Get recent books
+  Future<List<Book>> getRecentBooks({int limit = 10}) async {
+    try {
+      final querySnapshot = await _booksCollection
+          .where('isPublic', isEqualTo: true)
+          .orderBy('updatedAt', descending: true)
+          .limit(limit)
+          .get();
+          
+      List<Book> books = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      return books;
+    } catch (e) {
+      throw Exception('Failed to load recent books: $e');
+    }
+  }
+
+  // Get popular books
+  Future<List<Book>> getPopularBooks({int limit = 10}) async {
+    try {
+      final querySnapshot = await _booksCollection
+          .where('isPublic', isEqualTo: true)
+          .orderBy('saves', descending: true)
+          .limit(limit)
+          .get();
+          
+      List<Book> books = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      return books;
+    } catch (e) {
+      throw Exception('Failed to load popular books: $e');
+    }
+  }
+
+  // Search books by title or author
+  Future<List<Book>> searchBooks(String query, {int limit = 20}) async {
+    try {
+      // Firebase doesn't support direct text search, so we'll use a basic startsWith query
+      final querySnapshot = await _booksCollection
+          .where('isPublic', isEqualTo: true)
+          .where('titleLower', isGreaterThanOrEqualTo: query.toLowerCase())
+          .where('titleLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .limit(limit)
+          .get();
+          
+      List<Book> books = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      // Also search by author name
+      final authorQuerySnapshot = await _booksCollection
+          .where('isPublic', isEqualTo: true)
+          .where('authorNameLower', isGreaterThanOrEqualTo: query.toLowerCase())
+          .where('authorNameLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .limit(limit)
+          .get();
+          
+      for (var doc in authorQuerySnapshot.docs) {
+        // Skip if we already added this book
+        if (books.any((book) => book.id == doc.id)) {
+          continue;
+        }
+        
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      return books;
+    } catch (e) {
+      throw Exception('Failed to search books: $e');
+    }
+  }
+
+  // Get books by genre
+  Future<List<Book>> getBooksByGenre(String genre, {int limit = 20}) async {
+    try {
+      final querySnapshot = await _booksCollection
+          .where('isPublic', isEqualTo: true)
+          .where('genres', arrayContains: genre)
+          .limit(limit)
+          .get();
+          
+      List<Book> books = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl != null) {
+          final coverImage = await _getCoverImageFromUrl(coverUrl);
+          books.add(Book(
+            coverImage,
+            doc.id,
+            name: data['title'] ?? 'Untitled',
+            author: data['authorName'] ?? 'Unknown',
+            artist: data['artistName'] ?? 'Unknown',
+            description: data['description'] ?? 'No description',
+            genres: List<String>.from(data['genres'] ?? []),
+            themes: List<String>.from(data['themes'] ?? []),
+            format: _parseBookFormat(data['format']),
+            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+            saves: (data['saves'] as num?)?.toInt() ?? 0,
+            chapters: (data['chapters'] as num?)?.toInt() ?? 0,
+            isPublic: data['isPublic'] ?? false,
+            views: data['views']?.toString(),
+            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+          ));
+        }
+      }
+      
+      return books;
+    } catch (e) {
+      throw Exception('Failed to load books by genre: $e');
+    }
+  }
+
+  // Update the chapter count for a book
+  Future<void> updateChapterCount(String bookId, int chapterCount) async {
+    try {
+      await _booksCollection.doc(bookId).update({
+        'chapters': chapterCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update chapter count: $e');
+    }
+  }
+
+  // Delete a book and all its chapters
+  Future<void> deleteBook(String bookId) async {
+    try {
+      // First, delete all chapters
+      final chaptersRef = _firestore.collection('books').doc(bookId).collection('chapters');
+      final chaptersSnapshot = await chaptersRef.get();
+      
+      // Batch delete all chapters
+      final batch = _firestore.batch();
+      for (var doc in chaptersSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+      
+      // Delete the book cover from storage
+      try {
+        await _storage.ref('book_covers/$bookId').delete();
+      } catch (e) {
+        // Ignore if the cover doesn't exist
+      }
+      
+      // Delete the book document
+      await _booksCollection.doc(bookId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete book: $e');
+    }
+  }
+
+  // Save a book to user's library
+  Future<void> saveBook(String bookId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+      
+      // Add to user's saved books
+      await _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('saved_books')
+          .doc(bookId)
+          .set({
+            'savedAt': FieldValue.serverTimestamp(),
+          });
+      
+      // Increment the saves count on the book
+      await _booksCollection.doc(bookId).update({
+        'saves': FieldValue.increment(1),
+      });
+    } catch (e) {
+      throw Exception('Failed to save book: $e');
+    }
+  }
+
+  // Remove a book from user's library
+  Future<void> unsaveBook(String bookId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+      
+      // Remove from user's saved books
+      await _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('saved_books')
+          .doc(bookId)
+          .delete();
+      
+      // Decrement the saves count on the book
+      await _booksCollection.doc(bookId).update({
+        'saves': FieldValue.increment(-1),
+      });
+    } catch (e) {
+      throw Exception('Failed to unsave book: $e');
+    }
+  }
+
+  // Check if a book is saved by the current user
+  Future<bool> isBookSaved(String bookId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        return false;
+      }
+      
+      final docSnapshot = await _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('saved_books')
+          .doc(bookId)
+          .get();
+      
+      return docSnapshot.exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Increment view count for a book
+  Future<void> incrementBookView(String bookId) async {
+    try {
+      await _booksCollection.doc(bookId).update({
+        'views': FieldValue.increment(1),
+      });
+    } catch (e) {
+      // Silently fail view counting to not disrupt user experience
     }
   }
 }

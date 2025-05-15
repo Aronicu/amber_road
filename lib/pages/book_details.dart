@@ -431,137 +431,138 @@ class _BookDetailsState extends State<BookDetailsPage> {
   }
 
   Widget _buildChapters(BuildContext context) {
-  final theme = Theme.of(context);
-  // Get the background color from theme and darken it slightly
-  final backgroundColor = theme.colorScheme.surface.withValues(alpha: 0.7);
-  final textColor = theme.colorScheme.onSurface;
+  //   final theme = Theme.of(context);
+  //   // Get the background color from theme and darken it slightly
+  //   final backgroundColor = theme.colorScheme.surface.withValues(alpha: 0.7);
+  //   final textColor = theme.colorScheme.onSurface;
 
-  List<Chapter> chapters = [];
-  for (int i = 1; i <= widget.book.chapters; i++) {
-    // Make some chapters have different statuses for demonstration
-    bool isFinished = i <= widget.book.chapters * 0.3; // First 30% are finished
-    bool isDownloaded = i <= widget.book.chapters * 0.5 && !isFinished; // Next 20% are downloaded
-    bool isPurchased = i <= widget.book.chapters * 0.7 && !isFinished && !isDownloaded; // Next 20% are purchased
+  //   List<Chapter> chapters = [];
+  //   for (int i = 1; i <= widget.book.chapters; i++) {
+  //     // Make some chapters have different statuses for demonstration
+  //     bool isFinished = i <= widget.book.chapters * 0.3; // First 30% are finished
+  //     bool isDownloaded = i <= widget.book.chapters * 0.5 && !isFinished; // Next 20% are downloaded
+  //     bool isPurchased = i <= widget.book.chapters * 0.7 && !isFinished && !isDownloaded; // Next 20% are purchased
+      
+  //     chapters.add(Chapter(
+  //       i, // id
+  //       i, // chapterNum
+  //       widget.book.id,
+  //       isFinished: isFinished,
+  //       isDownloaded: isDownloaded,
+  //       isPurchased: isPurchased,
+  //     ));
+  //   }
     
-    chapters.add(Chapter(
-      i, // id
-      i, // chapterNum
-      widget.book.id,
-      isFinished: isFinished,
-      isDownloaded: isDownloaded,
-      isPurchased: isPurchased,
-    ));
+  //   return Container(
+  //     color: backgroundColor,
+  //     padding: EdgeInsets.symmetric(vertical: 16.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+  //           child: Text(
+  //             'Chapters',
+  //             style: TextStyle(
+  //               fontSize: 18.0,
+  //               fontWeight: FontWeight.bold,
+  //               color: textColor,
+  //             ),
+  //           ),
+  //         ),
+  //         // Sort chapters in descending order (newest first)
+  //         ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter)),
+  //       ],
+  //     ),
+  //   );
+    return Center(child: Text("There are not Chapters Yet"),);
   }
-  
-  return Container(
-    color: backgroundColor,
-    padding: EdgeInsets.symmetric(vertical: 16.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+
+  Widget _buildChapterItem(BuildContext context, Chapter chapter) {
+    final darkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = darkMode ? Colors.white : Colors.black;
+    final subtitleColor = darkMode ? Colors.grey[400] : Colors.grey[600];
+    final dividerColor = darkMode ? Colors.grey[800] : Colors.grey[300];
+    
+    // Format the date based on chapter number
+    String dateText = '';
+    if (chapter.chapterNum == 4) {
+      dateText = 'Yesterday';
+    } else if (chapter.chapterNum == 3) {
+      dateText = 'Feb 18, 2025';
+    } else if (chapter.chapterNum == 2) {
+      dateText = 'Feb 10, 2025';
+    } else {
+      dateText = 'Feb 3, 2025';
+    }
+    
+    // Determine the icon based on chapter status
+    IconData statusIcon;
+    if (chapter.isFinished) {
+      statusIcon = Icons.check_circle;
+    } else if (chapter.isDownloaded) {
+      statusIcon = Icons.download_done;
+    } else if (chapter.isPurchased) {
+      statusIcon = Icons.lock_open;
+    } else {
+      statusIcon = Icons.play_circle_outline;
+    }
+    
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Chapters',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: textColor,
+        InkWell(
+          onTap: () {
+            // Handle chapter tap
+            // You can navigate to chapter reading page here
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Chapter ${chapter.chapterNum}',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500,
+                          color: textColor,
+                        ),
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        dateText,
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: subtitleColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  statusIcon,
+                  color: chapter.isFinished 
+                      ? Colors.green
+                      : (darkMode ? Colors.grey[400] : Colors.grey[700]),
+                  size: 24.0,
+                ),
+              ],
             ),
           ),
         ),
-        // Sort chapters in descending order (newest first)
-        ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter)),
-      ],
-    ),
-  );
-}
-
-Widget _buildChapterItem(BuildContext context, Chapter chapter) {
-  final darkMode = Theme.of(context).brightness == Brightness.dark;
-  final textColor = darkMode ? Colors.white : Colors.black;
-  final subtitleColor = darkMode ? Colors.grey[400] : Colors.grey[600];
-  final dividerColor = darkMode ? Colors.grey[800] : Colors.grey[300];
-  
-  // Format the date based on chapter number
-  String dateText = '';
-  if (chapter.chapterNum == 4) {
-    dateText = 'Yesterday';
-  } else if (chapter.chapterNum == 3) {
-    dateText = 'Feb 18, 2025';
-  } else if (chapter.chapterNum == 2) {
-    dateText = 'Feb 10, 2025';
-  } else {
-    dateText = 'Feb 3, 2025';
-  }
-  
-  // Determine the icon based on chapter status
-  IconData statusIcon;
-  if (chapter.isFinished) {
-    statusIcon = Icons.check_circle;
-  } else if (chapter.isDownloaded) {
-    statusIcon = Icons.download_done;
-  } else if (chapter.isPurchased) {
-    statusIcon = Icons.lock_open;
-  } else {
-    statusIcon = Icons.play_circle_outline;
-  }
-  
-  return Column(
-    children: [
-      InkWell(
-        onTap: () {
-          // Handle chapter tap
-          // You can navigate to chapter reading page here
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Chapter ${chapter.chapterNum}',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500,
-                        color: textColor,
-                      ),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      dateText,
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: subtitleColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                statusIcon,
-                color: chapter.isFinished 
-                    ? Colors.green
-                    : (darkMode ? Colors.grey[400] : Colors.grey[700]),
-                size: 24.0,
-              ),
-            ],
-          ),
+        Divider(
+          height: 1.0,
+          thickness: 1.0,
+          color: dividerColor,
+          indent: 16.0,
+          endIndent: 16.0,
         ),
-      ),
-      Divider(
-        height: 1.0,
-        thickness: 1.0,
-        color: dividerColor,
-        indent: 16.0,
-        endIndent: 16.0,
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   String _formatToString(BookFormat format) {
     switch (format) {
