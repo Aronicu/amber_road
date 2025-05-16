@@ -118,6 +118,7 @@ class _BookManagementState extends State<BookManagementPage> {
                     _buildEditableDescription(context),
                     _buildEditableDetails(context),
                     _buildChapterManagement(context),
+                    SizedBox(height: 50,)
                   ],
                 ),
               ),
@@ -598,7 +599,7 @@ class _PriceEditDialogState extends State<PriceEditDialog> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: 'Price per Chapter',
-          prefixText: '\$',
+          prefixText: r'$',
           errorText: _errorText,
         ),
         onChanged: (value) {

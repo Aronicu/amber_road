@@ -370,7 +370,7 @@ class BookService {
       final querySnapshot = await _booksCollection
           .where('isPublic', isEqualTo: true)
           .where('titleLower', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('titleLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .where('titleLower', isLessThanOrEqualTo: '${query.toLowerCase()}\uf8ff')
           .limit(limit)
           .get();
           
@@ -405,7 +405,7 @@ class BookService {
       final authorQuerySnapshot = await _booksCollection
           .where('isPublic', isEqualTo: true)
           .where('authorNameLower', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('authorNameLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .where('authorNameLower', isLessThanOrEqualTo: '${query.toLowerCase()}\uf8ff')
           .limit(limit)
           .get();
           

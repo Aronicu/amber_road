@@ -1,20 +1,27 @@
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/router.dart';
+import 'package:amber_road/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MainApp());
+  await NotificationService.initialize();
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  MainApp({super.key});
+
+  
   
   @override
   Widget build(BuildContext context) => MaterialApp.router(
     title: "Amber Road",
+    scaffoldMessengerKey: scaffoldMessengerKey,
     routerConfig: AppNavigation.router,
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(

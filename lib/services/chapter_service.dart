@@ -1,9 +1,12 @@
 
 import 'dart:io';
+import 'dart:math';
+import 'package:amber_road/services/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 import '../models/chapter.dart';
 
 class ChapterService {
@@ -72,6 +75,7 @@ class ChapterService {
     required List<File> imageFiles,
     bool isPublished = false,
   }) async {
+    final notificationId = Random().nextInt(10000);
     try {
       // Check if user is logged in
       User? currentUser = _auth.currentUser;
@@ -82,10 +86,31 @@ class ChapterService {
       // Create chapter document reference
       DocumentReference chapterRef = _getChaptersCollection(bookId).doc();
       String chapterId = chapterRef.id;
+
+      
+      // Show initial notification
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '📤 Uploading Chapter',
+        content: 'Preparing files...',
+      );
       
       // Upload all images and get their URLs
       List<String> imageUrls = [];
       for (int i = 0; i < imageFiles.length; i++) {
+        // Upload image
+        final File image = imageFiles[i];
+        final double progress = ((i + 1) / imageFiles.length) * 100;
+
+        // Update notification
+        await NotificationService.showUploadNotification(
+          notificationId: notificationId,
+          title: '📤 Uploading Chapter',
+          content: '${progress.toStringAsFixed(0)}% complete\n'
+                  'Uploading image ${i + 1} of ${imageFiles.length}',
+          progress: progress.toInt(),
+        );
+
         String imageUrl = await _uploadChapterImage(
           imageFile: imageFiles[i],
           bookId: bookId,
@@ -116,10 +141,28 @@ class ChapterService {
         'updatedAt': FieldValue.serverTimestamp(),
         'chaptersCount': FieldValue.increment(1),
       });
+
+      // Show completion
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '✅ Upload Complete',
+        content: 'Chapter published successfully!',
+        isComplete: true,
+      );
+
+      // Auto-dismiss after 5 seconds
+      await Future.delayed(const Duration(seconds: 5));
+      await NotificationService.cancelNotification(notificationId);
       
       return newChapter;
     } catch (e) {
-      print('Error creating image chapter: $e');
+      // Show error
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '❌ Upload Failed',
+        content: 'Error: ${e.toString()}',
+        isError: true,
+      );
       return null;
     }
   }
@@ -278,7 +321,14 @@ class ChapterService {
     List<File>? newImages,
     bool? isPublished,
   }) async {
+    final notificationId = Random().nextInt(10000);
     try {
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '🔄 Updating Chapter',
+        content: 'Preparing update...',
+      );
+
       // Check if user is logged in
       User? currentUser = _auth.currentUser;
       if (currentUser == null) {
@@ -306,6 +356,13 @@ class ChapterService {
       if (newImages != null && newImages.isNotEmpty) {
         int startIndex = finalImageUrls.length;
         for (int i = 0; i < newImages.length; i++) {
+          final progress = (i + 1) / newImages.length;
+          await NotificationService.showUploadNotification(
+            notificationId: notificationId,
+            title: '📤 Adding New Images',
+            content: 'Uploading image ${i + 1} of $newImages.length',
+            progress: (progress * 100).toInt(),
+          );
           String newImageUrl = await _uploadChapterImage(
             imageFile: newImages[i],
             bookId: bookId,
@@ -325,9 +382,24 @@ class ChapterService {
       await _firestore.collection('books').doc(bookId).update({
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '✅ Update Complete',
+        content: 'Chapter updated successfully!',
+        isComplete: true,
+      );
     } catch (e) {
-      print('Error updating image chapter: $e');
-      throw Exception('Failed to update chapter: $e');
+      await NotificationService.showUploadNotification(
+        notificationId: notificationId,
+        title: '❌ Update Failed',
+        content: e.toString(),
+        isError: true,
+      );
+      rethrow;
+    } finally {
+      await Future.delayed(const Duration(seconds: 5));
+      await NotificationService.cancelNotification(notificationId);
     }
   }
   

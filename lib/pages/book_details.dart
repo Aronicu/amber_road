@@ -117,13 +117,12 @@ class _BookDetailsState extends State<BookDetailsPage> {
                       } else if (snapshot.hasError) {
                         return Text('Error loading chapters: ${snapshot.error}');
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Scaffold(
-                          body: Center(child: Text("No Chapters Found"),),
-                        );
+                        return const Center(child: Text("No Chapters Found"),);
                       }
 
                       final chapters = snapshot.data!;
-                      return _buildChapters(chapters, context);
+                      // I HATE this with a Passion
+                      return _buildChapters(chapters, book, context);
                     },
                   ),
                 ],
@@ -464,7 +463,7 @@ class _BookDetailsState extends State<BookDetailsPage> {
     );
   }
 
-  Widget _buildChapters(List<Chapter> chapters, BuildContext context) {
+  Widget _buildChapters(List<Chapter> chapters, Book book, BuildContext context) {
     final theme = Theme.of(context);
     // Get the background color from theme and darken it slightly
     final backgroundColor = theme.colorScheme.surface.withValues(alpha: 0.7);
@@ -488,14 +487,14 @@ class _BookDetailsState extends State<BookDetailsPage> {
             ),
           ),
           // Sort chapters in descending order (newest first)
-          ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter)),
+          ...chapters.reversed.map((chapter) => _buildChapterItem(context, chapter, book)),
         ],
       ),
     );
     // return Center(child: Text("There are not Chapters Yet"),);
   }
 
-  Widget _buildChapterItem(BuildContext context, Chapter chapter) {
+  Widget _buildChapterItem(BuildContext context, Chapter chapter, Book book) {
     final darkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = darkMode ? Colors.white : Colors.black;
     final subtitleColor = darkMode ? Colors.grey[400] : Colors.grey[600];
@@ -530,7 +529,8 @@ class _BookDetailsState extends State<BookDetailsPage> {
         InkWell(
           onTap: () {
             final currentRoute = GoRouterState.of(context).matchedLocation;
-            context.go('/book/${widget.bookId}/${chapter.id}', extra: currentRoute);
+            // context.go('/book/${book.id}', extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
+            context.go('/book/${widget.bookId}/${chapter.id}', extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

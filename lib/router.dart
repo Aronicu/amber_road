@@ -1,6 +1,6 @@
-import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
-import 'package:amber_road/pages/author_center/add_chapter_page.dart';
+import 'package:amber_road/models/book.dart';
+import 'package:amber_road/pages/author_center/manage_chapter_page.dart';
 import 'package:amber_road/pages/author_center/author_center.dart';
 import 'package:amber_road/pages/book_details.dart';
 import 'package:amber_road/pages/chapter_detail_page.dart';
@@ -96,12 +96,15 @@ class AppNavigation {
         final bookId = state.pathParameters['id']!;
         final chapterId = state.pathParameters['cid']!;
 
-        // Get the referring route from extra data if available
-        final fromRoute = state.extra != null && state.extra is String 
-            ? state.extra as String 
-            : '/store';
+        // Get additional parameters from extra
+        final extra = state.extra is Map<String, dynamic> 
+            ? state.extra as Map<String, dynamic>
+            : {};
+        
+        final fromRoute = extra['fromRoute'] ?? '/store';
+        final bookFormat = extra['bookFormat'] ?? BookFormat.webtoon;
 
-        return ChapterDetailPage(bookId: bookId, chapterId: chapterId, fromRoute: fromRoute);
+        return ChapterDetailPage(bookId: bookId, chapterId: chapterId, bookFormat: bookFormat, fromRoute: fromRoute);
       }),
 
       GoRoute(path: "/editProfile", name: "editProfile", builder: (context, state) {
@@ -130,7 +133,7 @@ class AppNavigation {
           ? state.extra as String 
           : '/store';
 
-        return AddChapterPage(bookId: bookId, fromRoute: fromRoute,);
+        return ManageChapterPage(bookId: bookId, fromRoute: fromRoute,);
       },),
       GoRoute(path: "/editChapter/:bid/:cnum", name: "editChapter", builder: (context, state) {
         final bookId = state.pathParameters['bid']!;
@@ -139,7 +142,7 @@ class AppNavigation {
           ? state.extra as String 
           : '/store';
 
-        return AddChapterPage(bookId: bookId, chapterNum: chapterNum, fromRoute: fromRoute,);
+        return ManageChapterPage(bookId: bookId, chapterNum: chapterNum, fromRoute: fromRoute,);
       },)
   ]);
 }

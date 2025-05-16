@@ -370,16 +370,16 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
             });
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
+            backgroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.selected)) {
                   return colSpecial;
                 }
                 return Colors.grey[800]!;
               },
             ),
-            foregroundColor: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+            foregroundColor: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
                 return colPrimary;
               },
             ),
@@ -406,17 +406,17 @@ class _CreateWorkPageState extends State<CreateWorkPage> {
           children: [
             SwitchTheme(
               data: SwitchThemeData(
-                thumbColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
+                thumbColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
                       return colSpecial;
                     }
                     return Colors.grey;
                   },
                 ),
-                trackColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.selected)) {
+                trackColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
                       return colSpecial.withOpacity(0.5);
                     }
                     return Colors.grey.withOpacity(0.5);

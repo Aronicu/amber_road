@@ -1,3 +1,4 @@
+import 'package:amber_road/models/book.dart';
 import 'package:amber_road/models/chapter.dart';
 import 'package:amber_road/services/chapter_service.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +11,14 @@ class ChapterDetailPage extends StatefulWidget {
     super.key, 
     required this.bookId, 
     required this.chapterId,
+    required this.bookFormat,
     this.fromRoute = "/store",
   });
   
   final String bookId;
   final String chapterId;
   final String fromRoute;
+  final BookFormat bookFormat;
 
   @override
   State<ChapterDetailPage> createState() => _ChapterDetailPageState();
@@ -73,40 +76,14 @@ class _ChapterDetailPageState extends State<ChapterDetailPage> {
     if (_chapter == null || _chapter!.imageUrls.isEmpty) {
       return const Center(child: Text('No images available'));
     }
-    
+
+    final isWebtoon = widget.bookFormat == BookFormat.webtoon;
+
     return Stack(
       children: [
-        // Image gallery
-        PhotoViewGallery.builder(
-          scrollPhysics: const BouncingScrollPhysics(),
-          builder: (BuildContext context, int index) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider: NetworkImage(_chapter!.imageUrls[index]),
-              initialScale: PhotoViewComputedScale.contained,
-              minScale: PhotoViewComputedScale.contained,
-              maxScale: PhotoViewComputedScale.covered * 2,
-            );
-          },
-          itemCount: _chapter!.imageUrls.length,
-          loadingBuilder: (context, event) => Center(
-            child: SizedBox(
-              width: 20.0,
-              height: 20.0,
-              child: CircularProgressIndicator(
-                value: event == null
-                    ? 0
-                    : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
-              ),
-            ),
-          ),
-          backgroundDecoration: const BoxDecoration(color: Colors.black),
-          pageController: _pageController,
-          onPageChanged: (index) {
-            setState(() {
-              _currentImageIndex = index;
-            });
-          },
-        ),
+        isWebtoon 
+            ? _buildWebtoonViewer()
+            : _buildMangaViewer(),
         
         // Page indicator
         Positioned(
@@ -135,7 +112,93 @@ class _ChapterDetailPageState extends State<ChapterDetailPage> {
     );
   }
 
-  Widget _buildTextViewer() {
+  Widget _buildMangaViewer() {
+    return PhotoViewGallery.builder(
+        scrollPhysics: const BouncingScrollPhysics(),
+        builder: (BuildContext context, int index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: NetworkImage(_chapter!.imageUrls[index]),
+            initialScale: PhotoViewComputedScale.contained,
+            minScale: PhotoViewComputedScale.contained,
+            maxScale: PhotoViewComputedScale.covered * 2,
+          );
+        },
+        itemCount: _chapter!.imageUrls.length,
+        loadingBuilder: (context, event) => Center(
+          child: SizedBox(
+            width: 20.0,
+            height: 20.0,
+            child: CircularProgressIndicator(
+              value: event == null
+                  ? 0
+                  : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+            ),
+          ),
+        ),
+        backgroundDecoration: const BoxDecoration(color: Colors.black),
+        pageController: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentImageIndex = index;
+          });
+        },
+      );
+  }
+
+  Widget _buildWebtoonViewer() {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        // Update current image index based on scroll position
+        final position = _scrollController.position;
+        final viewportHeight = MediaQuery.of(context).size.height;
+        final currentIndex = (position.pixels / viewportHeight).floor();
+        if (currentIndex != _currentImageIndex) {
+          setState(() => _currentImageIndex = currentIndex);
+        }
+        return false;
+      },
+      child: ListView.builder(
+        controller: _scrollController,
+        physics: const ClampingScrollPhysics(),
+        itemCount: _chapter!.imageUrls.length,
+        itemBuilder: (context, index) {
+          return Container(
+            width: MediaQuery.of(context).size.width,
+            margin: EdgeInsets.zero,
+            child: InteractiveViewer(
+              panEnabled: false,
+              child: Image.network(
+                _chapter!.imageUrls[index],
+                fit: BoxFit.fitWidth,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / 
+                            loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: frame != null ? child : Container(
+                      color: Colors.grey[900],
+                      height: MediaQuery.of(context).size.height,
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNovelViewer() {
     if (_chapter == null || _chapter!.textContent.isEmpty) {
       return const Center(child: Text('No content available'));
     }
@@ -178,7 +241,7 @@ class _ChapterDetailPageState extends State<ChapterDetailPage> {
             : _chapter == null
                 ? const Center(child: Text('Chapter not found'))
                 : _chapter!.contentType == ChapterContentType.text
-                    ? _buildTextViewer()
+                    ? _buildNovelViewer()
                     : _buildImageViewer(),
       ),
     );

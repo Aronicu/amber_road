@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:amber_road/main.dart';
 import 'package:amber_road/services/book_services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,8 +9,8 @@ import '../../models/book.dart';
 import '../../models/chapter.dart';
 import '../../services/chapter_service.dart';
 
-class AddChapterPage extends StatefulWidget {
-  const AddChapterPage({
+class ManageChapterPage extends StatefulWidget {
+  const ManageChapterPage({
     super.key, 
     required this.bookId, 
     this.fromRoute = "/store",
@@ -21,10 +22,10 @@ class AddChapterPage extends StatefulWidget {
   final int? chapterNum; // If editing an existing chapter
 
   @override
-  State<StatefulWidget> createState() => _AddChapterPageState();
+  State<StatefulWidget> createState() => _ManageChapterPageState();
 }
 
-class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProviderStateMixin {
+class _ManageChapterPageState extends State<ManageChapterPage> with SingleTickerProviderStateMixin {
   final BookService _bookService = BookService();
   final ChapterService _chapterService = ChapterService();
   final TextEditingController _titleController = TextEditingController();
@@ -32,7 +33,7 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
   
   Book? _book;
   bool _isLoading = true;
-  bool _isSaving = false;
+  // bool _isSaving = false;
   
   // For manga/webtoon
   final List<File> _selectedImages = [];
@@ -112,32 +113,46 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
+    // final messenger = scaffoldMessengerKey.currentState;
+    final isTextEditor = _tabController.index == 0;
+
+    // setState(() {
+    //   _isSaving = true;
+    // });
 
     try {
-      final isTextEditor = _tabController.index == 0;
-      final contentType = isTextEditor 
-          ? ChapterContentType.text 
-          : ChapterContentType.images;
-      
-      // Validate content based on type
+      // Show initial progress
+      // messenger?.showSnackBar(
+      //   SnackBar(
+      //     content: Row(
+      //       children: [
+      //         const CircularProgressIndicator(),
+      //         const SizedBox(width: 20),
+      //         Text(isTextEditor ? 'Saving chapter...' : 'Uploading images...'),
+      //       ],
+      //     ),
+      //     duration: const Duration(days: 1),
+      //   ),
+      // );
+
       if (isTextEditor && _textContentController.text.trim().isEmpty) {
         _showErrorSnackbar('Please enter some text content');
-        setState(() {
-          _isSaving = false;
-        });
+        // setState(() {
+        //   _isSaving = false;
+        // });
         return;
       }
       
       if (!isTextEditor && _selectedImages.isEmpty && _existingImageUrls.isEmpty) {
         _showErrorSnackbar('Please select at least one image');
-        setState(() {
-          _isSaving = false;
-        });
+        // setState(() {
+        //   _isSaving = false;
+        // });
         return;
       }
+
+      context.go(widget.fromRoute);
+
       
       // Create or update the chapter
       if (widget.chapterNum == null) {
@@ -156,6 +171,8 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
             title: _titleController.text,
             imageFiles: _selectedImages,
           );
+
+          // context.go(widget.fromRoute);
         }
       } else {
         // Update existing chapter
@@ -175,24 +192,30 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
             imageUrls: _existingImageUrls,
             newImages: _selectedImages,
           );
+          // context.go(widget.fromRoute);
         }
       }
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chapter saved successfully')),
-      );
-      
-      // Navigate back
-      if (context.mounted) {
-        context.go(widget.fromRoute);
-      }
+      // Show success and navigate back
+      // messenger?.hideCurrentSnackBar();
+      // messenger?.showSnackBar(
+      //   const SnackBar(content: Text('Chapter saved successfully')),
+      // );
+      // context.go(widget.fromRoute);
     } catch (e) {
+      // messenger?.hideCurrentSnackBar();
+      // messenger?.showSnackBar(
+      //   SnackBar(
+      //     content: Text('Error: $e'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
       _showErrorSnackbar('Error saving chapter: $e');
     }
     
-    setState(() {
-      _isSaving = false;
-    });
+    // setState(() {
+    //   _isSaving = false;
+    // });
   }
 
   void _showErrorSnackbar(String message) {
@@ -277,7 +300,7 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
                 label: const Text('Add Images'),
               ),
               const SizedBox(width: 16),
-              Text('${totalImages} images selected'),
+              Text('$totalImages images selected'),
             ],
           ),
           const SizedBox(height: 16),
@@ -354,7 +377,6 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
                         allImages.insert(newIndex, item);
                         
                         // Update the lists accordingly
-                        final updatedExistingCount = allImages.where((path) => !path.startsWith('/')).length;
                         setState(() {
                           _existingImageUrls = allImages.where((path) => !path.startsWith('/')).toList();
                           
@@ -450,14 +472,8 @@ class _AddChapterPageState extends State<AddChapterPage> with SingleTickerProvid
           ),
           actions: [
             TextButton.icon(
-              onPressed: _isSaving ? null : _saveChapter,
-              icon: _isSaving 
-                  ? const SizedBox(
-                      width: 16, 
-                      height: 16, 
-                      child: CircularProgressIndicator(strokeWidth: 2)
-                    )
-                  : const Icon(Icons.save),
+              onPressed: _saveChapter,
+              icon: const Icon(Icons.save),
               label: const Text('SAVE'),
             ),
           ],
