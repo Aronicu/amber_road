@@ -2,6 +2,7 @@ import 'package:amber_road/constants/book_prototype.dart';
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/providers/google_signin_provider.dart';
+import 'package:amber_road/services/book_services.dart';
 import 'package:amber_road/widgets/book_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,7 +44,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           _buildProfileHeader(context, userData),
                           _buildStatsSection(userData, context),
-                          _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                           _buildAuthorCenterButton(context),
                         ],
                       ),
@@ -53,7 +53,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         _buildProfileHeader(context, null), 
                         _buildStatsSection(null, context),
-                        _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                         _buildAuthorCenterButton(context),
                         const Center(child: Text("User data not found in Firestore.")),
                       ],
@@ -66,7 +65,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   _buildProfileHeader(context, null),
                   _buildStatsSection(null, context),
-                  _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                   _buildAuthorCenterButton(context),
                 ],
               );
@@ -88,39 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           }
         },
-      ),
-    );
-  }
-
-  Widget _history(List<Book> books) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "History",
-            style: TextStyle(
-              color: colPrimary,
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 220,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final b in books) CoverView(book: b),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

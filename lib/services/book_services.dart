@@ -16,6 +16,7 @@ class BookService {
   final CollectionReference _booksCollection = 
       FirebaseFirestore.instance.collection('books');
   
+  
   // Create a new book in Firestore with cover image in Storage
   Future<Book?> createBook({
     required String title,
