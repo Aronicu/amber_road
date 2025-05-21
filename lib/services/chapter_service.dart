@@ -274,6 +274,41 @@ class ChapterService {
       return [];
     }
   }
+
+  Future<void> publishChapter({
+    required String bookId,
+    required String chapterId,
+  }) async {
+    try {
+      await _firestore
+          .collection('books')
+          .doc(bookId)
+          .collection('chapters')
+          .doc(chapterId)
+          .update({
+            'isPublished': true,
+            'publishedAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      throw Exception('Failed to publish chapter: $e');
+    }
+  }
+
+  // Add to ChapterService
+  Future<void> unpublishChapter({
+    required String bookId,
+    required String chapterId,
+  }) async {
+    await _firestore
+        .collection('books')
+        .doc(bookId)
+        .collection('chapters')
+        .doc(chapterId)
+        .update({
+          'isPublished': false,
+          'unpublishedAt': FieldValue.serverTimestamp(),
+        });
+  }
   
   // Update text content of a chapter
   Future<void> updateTextChapter({

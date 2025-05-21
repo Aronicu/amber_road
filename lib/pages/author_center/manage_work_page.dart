@@ -4,6 +4,7 @@ import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:amber_road/models/chapter.dart';
 import 'package:amber_road/services/book_services.dart';
+import 'package:amber_road/services/chapter_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -267,21 +268,52 @@ class _BookManagementState extends State<BookManagementPage> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _editedBook!.chapterCount,
       itemBuilder: (context, index) {
-        return ListTile(
-          title: Text('Chapter ${index + 1}'),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: colSpecial),
-                onPressed: () => _editChapter(index + 1),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteChapter(index + 1),
-              ),
-            ],
+        final chapterNumber = index + 1;
+        return FutureBuilder<Chapter?>(
+          future: ChapterService().getChapterByChapNumber(
+            bookId: widget.bookId, 
+            chapterNum: chapterNumber
           ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ListTile(title: Text('Loading chapter...'));
+            }
+            
+            final chapter = snapshot.data;
+            final isPublished = chapter?.isPublished ?? false;
+
+            return ListTile(
+              title: Text('Chapter $chapterNumber'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Publish/Unpublish Control
+                  if (!isPublished)
+                    IconButton(
+                      icon: const Icon(Icons.publish, color: colSpecial),
+                      onPressed: () => _publishChapter(chapter!.id),
+                    ),
+                  if (isPublished)
+                    IconButton(
+                      icon: const Icon(Icons.unpublished, color: Colors.orange),
+                      onPressed: () => _unpublishChapter(chapter!.id),
+                    ),
+                  
+                  // Always show Edit button
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: colSpecial),
+                    onPressed: () => _editChapter(chapterNumber),
+                  ),
+                  
+                  // Delete button
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _deleteChapter(chapterNumber),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -399,50 +431,63 @@ class _BookManagementState extends State<BookManagementPage> {
   }
 
   Future<void> _deleteChapter(int chapterNumber) async {
-    // if (_editedBook == null) return;
-    
-    // // Show confirmation dialog
-    // final confirmed = await showDialog<bool>(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: const Text('Delete Chapter'),
-    //     content: Text('Are you sure you want to delete Chapter $chapterNumber?'),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () => Navigator.pop(context, false),
-    //         child: const Text('Cancel'),
-    //       ),
-    //       TextButton(
-    //         onPressed: () => Navigator.pop(context, true),
-    //         child: const Text('Delete', style: TextStyle(color: Colors.red)),
-    //       ),
-    //     ],
-    //   ),
-    // );
-    
-    // if (confirmed == true) {
-    //   // Implement delete logic
-    //   try {
-    //     await _bookService.deleteChapter(
-    //       bookId: widget.bookId,
-    //       chapterNumber: chapterNumber,
-    //     );
-        
-    //     // Update local state
-    //     setState(() {
-    //       _editedBook!.chapters -= 1;
-    //     });
-        
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(
-    //         content: Text('Chapter $chapterNumber deleted successfully'),
-    //         backgroundColor: Colors.green,
-    //       ),
-    //     );
-    //   } catch (e) {
-    //     _showError('Failed to delete chapter: $e');
-    //   }
-    // }
+    final ch = (await ChapterService().getChapterByChapNumber(bookId: widget.bookId, chapterNum: chapterNumber))!;
+    await ChapterService().deleteChapter(bookId: widget.bookId, chapterId: ch.id);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Chapter $chapterNumber deleted successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Force UI refresh
+    setState(() {});
+  }
+
+  Future<void> _publishChapter(String chapterId) async {
+    try {
+      await ChapterService().publishChapter(
+        bookId: widget.bookId,
+        chapterId: chapterId,
+      );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chapter published successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Force UI refresh
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Publish failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _unpublishChapter(String chapterId) async {
+    try {
+      await ChapterService().unpublishChapter(
+        bookId: widget.bookId,
+        chapterId: chapterId,
+      );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chapter unpublished'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      setState(() {});
+    } catch (e) {
+      // Handle error
+    }
   }
 
   Widget _buildLoadingView() {

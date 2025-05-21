@@ -99,11 +99,14 @@ class _BookDetailsState extends State<BookDetailsPage> {
                   ),
                   tooltip: _isInLibrary ? 'Remove from Library' : 'Add to Library',
                   onPressed: () async {
-                    await BookService().saveBook(widget.bookId);
+                    if (!_isInLibrary) {
+                      await BookService().saveBook(widget.bookId);
+                    }
+                    else {
+                      await BookService().unsaveBook(widget.bookId);
+                    }
                     await _checkIfBookIsSaved();
                     _showSuccessAlert(_isInLibrary);
-                    // _isInLibrary = !_isInLibrary;
-                    // _showSuccessAlert(_isInLibrary);
                   },
                 ),
                 const SizedBox(width: 8),
@@ -117,7 +120,7 @@ class _BookDetailsState extends State<BookDetailsPage> {
                   _buildDescription(context, book),
                   _buildDetailSection(context, book),
                   FutureBuilder<List<Chapter>>(
-                    future: ChapterService().getBookChapters(bookId: widget.bookId),
+                    future: ChapterService().getBookChapters(bookId: widget.bookId, publishedOnly: true),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -137,7 +140,12 @@ class _BookDetailsState extends State<BookDetailsPage> {
             ),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () async {
-                await BookService().saveBook(widget.bookId);
+                if (!_isInLibrary) {
+                  await BookService().saveBook(widget.bookId);
+                }
+                else {
+                  await BookService().unsaveBook(widget.bookId);
+                }
                 await _checkIfBookIsSaved();
                 _showSuccessAlert(_isInLibrary);
               },
