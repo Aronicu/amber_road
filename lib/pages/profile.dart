@@ -386,9 +386,8 @@ class _ProfilePageState extends State<ProfilePage> {
           // Close the dialog when any option is selected
           Navigator.of(context).pop();
           final user = FirebaseAuth.instance.currentUser!;
-          final data = (await FirebaseFirestore.instance.collection('users').doc(user.uid).get()).data() as Map<String, dynamic>;
           await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-            'coins': (data['coins'] as int) + howMany
+            'coins': FieldValue.increment(howMany)
           });
           
           setState(() {
