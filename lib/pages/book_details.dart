@@ -24,6 +24,12 @@ class _BookDetailsState extends State<BookDetailsPage> {
   // State for library status
   bool _isInLibrary = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkIfBookIsSaved();
+  }
+
   // Show a success snackbar
   void _showSuccessAlert(bool added) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -92,11 +98,12 @@ class _BookDetailsState extends State<BookDetailsPage> {
                     color: colSpecial,
                   ),
                   tooltip: _isInLibrary ? 'Remove from Library' : 'Add to Library',
-                  onPressed: () {
-                    setState(() {
-                      _isInLibrary = !_isInLibrary;
-                      _showSuccessAlert(_isInLibrary);
-                    });
+                  onPressed: () async {
+                    await BookService().saveBook(widget.bookId);
+                    await _checkIfBookIsSaved();
+                    _showSuccessAlert(_isInLibrary);
+                    // _isInLibrary = !_isInLibrary;
+                    // _showSuccessAlert(_isInLibrary);
                   },
                 ),
                 const SizedBox(width: 8),
@@ -129,11 +136,10 @@ class _BookDetailsState extends State<BookDetailsPage> {
               ),
             ),
             floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                setState(() {
-                  _isInLibrary = !_isInLibrary;
-                  _showSuccessAlert(_isInLibrary);
-                });
+              onPressed: () async {
+                await BookService().saveBook(widget.bookId);
+                await _checkIfBookIsSaved();
+                _showSuccessAlert(_isInLibrary);
               },
               backgroundColor: colSpecial,
               icon: Icon(
@@ -589,6 +595,15 @@ class _BookDetailsState extends State<BookDetailsPage> {
         return 'Web Comic';
       case BookFormat.webnovel:
         return 'Web Novel';
+    }
+  }
+
+  Future<void> _checkIfBookIsSaved() async {
+    final isSaved = await BookService().isBookSaved(widget.bookId);
+    if (mounted) {
+      setState(() {
+        _isInLibrary = isSaved;
+      });
     }
   }
 }

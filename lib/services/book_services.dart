@@ -580,6 +580,36 @@ class BookService {
     }
   }
 
+  // Get all saved books in user's library
+  Future<List<Book>> getSavedBooks() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Get all saved book IDs from user's library
+      final savedBooksSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('saved_books')
+          .get();
+
+      // Get full book details for each saved book
+      final List<Book> books = [];
+      for (final doc in savedBooksSnapshot.docs) {
+        final bookId = doc.id;
+        final bookDoc = await _firestore.collection('books').doc(bookId).get();
+        
+        if (bookDoc.exists) {
+          books.add(Book.fromFirestore(bookDoc));
+        }
+      }
+
+      return books;
+    } catch (e) {
+      throw Exception('Failed to fetch saved books: $e');
+    }
+  }
+
   // Check if a book is saved by the current user
   Future<bool> isBookSaved(String bookId) async {
     try {

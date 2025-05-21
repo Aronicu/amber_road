@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 enum BookFormat {
@@ -25,6 +26,30 @@ class Book {
     }
   );
 
+  factory Book.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Book(
+      Image.network(data['coverUrl']), // Load image from URL
+      data['id'] ?? doc.id, // Use document ID as fallback
+      name: data['name'] ?? 'Untitled',
+      author: data['authorName'] ?? 'Unknown Author', // Use display name
+      artist: data['artistName'] ?? data['authorName'] ?? 'Unknown Artist',
+      genres: List<String>.from(data['genres'] ?? []),
+      themes: List<String>.from(data['themes'] ?? []),
+      format: BookFormat.values.firstWhere(
+        (e) => e.toString().split('.').last == data['format'],
+        orElse: () => BookFormat.manga,
+      ),
+      description: data['description'] ?? 'No description available',
+      rating: (data['rating'] ?? 0.0).toDouble(),
+      saves: (data['saves'] ?? 0).toInt(),
+      chapterCount: (data['chaptersCount'] ?? 0).toInt(), // Note: 'chaptersCount' in Firestore
+      isPublic: data['isPublic'] ?? true,
+      views: data['views']?.toString(),
+      pricePerChapter: (data['pricePerChapter'] ?? 0.0).toDouble(),
+    );
+  }
+  
   String id;
   Image cover;
   String name;
