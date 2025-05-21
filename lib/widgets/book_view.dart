@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:amber_road/constants/theme.dart';
 import 'package:amber_road/models/book.dart';
 import 'package:flutter/material.dart';
@@ -294,6 +296,167 @@ class AuthorCoverView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class CyclingPopularTitle extends StatefulWidget {
+  final List<Book> books;
+  const CyclingPopularTitle({super.key, required this.books});
+
+  @override
+  State<CyclingPopularTitle> createState() => _CyclingPopularTitleState();
+}
+
+class _CyclingPopularTitleState extends State<CyclingPopularTitle> {
+  late final PageController _pageController;
+  late Timer _cycleTimer;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _startAutoCycle();
+  }
+
+  void _startAutoCycle() {
+    _cycleTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_currentIndex < widget.books.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0;
+      }
+      _pageController.animateToPage(
+        _currentIndex,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _handlePageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    // Reset timer when user manually swipes
+    _cycleTimer.cancel();
+    _startAutoCycle();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _cycleTimer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300.0,
+      child: PageView.builder(
+        controller: _pageController,
+        onPageChanged: _handlePageChanged,
+        itemCount: widget.books.length,
+        itemBuilder: (context, index) {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: _buildTitleContent(widget.books[index]),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTitleContent(Book book) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+
+    return Stack(
+      key: ValueKey(book.id), // Important for AnimatedSwitcher
+      children: [
+        Positioned.fill(
+          child: ShaderMask(
+            shaderCallback: (rect) {
+              return LinearGradient(
+                colors: [
+                  primaryColor,
+                  primaryColor.withAlpha(20),
+                  primaryColor,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ).createShader(rect);
+            },
+            blendMode: BlendMode.srcOver,
+            child: book.cover,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 100.0,
+                height: 150.0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: book.cover,
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.name,
+                      style: const TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      book.author,
+                      style: TextStyle(color: Colors.grey[300]),
+                    ),
+                    const SizedBox(height: 12.0),
+                    Wrap(
+                      spacing: 4.0,
+                      children: book.genres
+                          .map((genre) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0, vertical: 6.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  genre,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
