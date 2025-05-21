@@ -10,9 +10,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +42,7 @@ class ProfilePage extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildProfileHeader(context, userData),
-                          _buildStatsSection(userData),
+                          _buildStatsSection(userData, context),
                           _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                           _buildAuthorCenterButton(context),
                         ],
@@ -47,7 +52,7 @@ class ProfilePage extends StatelessWidget {
                     return Column(
                       children: [
                         _buildProfileHeader(context, null), 
-                        _buildStatsSection(null),
+                        _buildStatsSection(null, context),
                         _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                         _buildAuthorCenterButton(context),
                         const Center(child: Text("User data not found in Firestore.")),
@@ -60,7 +65,7 @@ class ProfilePage extends StatelessWidget {
               return Column(
                 children: [
                   _buildProfileHeader(context, null),
-                  _buildStatsSection(null),
+                  _buildStatsSection(null, context),
                   _history([theNovelsExtra, farmingLifeInAnotherWorld, soloLeveling, windBreaker]),
                   _buildAuthorCenterButton(context),
                 ],
@@ -211,10 +216,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-
-  Widget _buildStatsSection(DocumentSnapshot? userData) {
-    final int followers = userData?['followers'] as int? ?? 0;
-    final int following = userData?['following'] as int? ?? 0;
+  Widget _buildStatsSection(DocumentSnapshot? userData, BuildContext context) {
     final int coins = userData?['coins'] as int? ?? 0;
     final String bio = userData?['bio'] as String? ?? 'No bio added yet.';
 
@@ -223,40 +225,6 @@ class ProfilePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Followers and Following stats
-          Row(
-            children: [
-              Text(
-                '$followers',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-              const Text(
-                ' followers',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                '$following',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-              const Text(
-                ' following',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 16),
           // Coins and Add More button
           Row(
@@ -286,12 +254,17 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.deepOrange,
-                  borderRadius: BorderRadius.circular(16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  backgroundColor: Colors.deepOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
+                onPressed: () {
+                  _showCoinPurchaseOptions(context);
+                },
                 child: const Text(
                   'Add More',
                   style: TextStyle(
@@ -300,7 +273,7 @@ class ProfilePage extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-              ),
+              )
             ],
           ),
           const SizedBox(height: 16),
@@ -358,6 +331,79 @@ class ProfilePage extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCoinPurchaseOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Purchase Coins',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                _buildCoinOption(context, '100 Coins', 100),
+                _buildCoinOption(context, '250 Coins', 250),
+                _buildCoinOption(context, '500 Coins', 500),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCoinOption(BuildContext context, String text, int howMany) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepOrange,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        onPressed: () async {
+          // Close the dialog when any option is selected
+          Navigator.of(context).pop();
+          final user = FirebaseAuth.instance.currentUser!;
+          final data = (await FirebaseFirestore.instance.collection('users').doc(user.uid).get()).data() as Map<String, dynamic>;
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'coins': (data['coins'] as int) + howMany
+          });
+          
+          setState(() {
+            
+          });
+          // In a real app, you would call your purchase API here
+          // For now, we just close the dialog
+          
+        },
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
           ),
         ),
       ),
