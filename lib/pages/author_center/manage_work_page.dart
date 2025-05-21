@@ -149,6 +149,11 @@ class _BookManagementState extends State<BookManagementPage> {
                 : const Icon(Icons.save, color: colSpecial),
             onPressed: _isSaving ? null : _saveChanges,
           ),
+        if (!_isLoading)
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: _deleteBook,
+          ),
       ],
     );
   }
@@ -443,6 +448,17 @@ class _BookManagementState extends State<BookManagementPage> {
 
     // Force UI refresh
     setState(() {});
+  }
+
+  Future<void> _deleteBook() async {
+    await BookService().deleteBook(widget.bookId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Book deleted successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    if (context.mounted) context.go(widget.fromRoute);
   }
 
   Future<void> _publishChapter(String chapterId) async {

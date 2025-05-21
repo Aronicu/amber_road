@@ -72,6 +72,7 @@ class BookService {
         'pricePerChapter': pricePerChapter,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        'isDeleted': false,
       };
       
       // Add book to Firestore
@@ -230,6 +231,7 @@ class BookService {
       
       final querySnapshot = await _booksCollection
           .where('authorId', isEqualTo: currentUser.uid)
+          .where('isDeleted', isEqualTo: false)
           .get();
           
       List<Book> books = [];
@@ -284,6 +286,7 @@ class BookService {
     try {
       final querySnapshot = await _booksCollection
           .where('isPublic', isEqualTo: true)
+          .where('isDeleted', isEqualTo: false)
           .orderBy('updatedAt', descending: true)
           .limit(limit)
           .get();
@@ -326,6 +329,7 @@ class BookService {
     try {
       final querySnapshot = await _booksCollection
           .where('isPublic', isEqualTo: true)
+          .where('isDeleted', isEqualTo: false)
           .orderBy('saves', descending: true)
           .limit(limit)
           .get();
@@ -503,26 +507,20 @@ class BookService {
   // Delete a book and all its chapters
   Future<void> deleteBook(String bookId) async {
     try {
-      // First, delete all chapters
-      final chaptersRef = _firestore.collection('books').doc(bookId).collection('chapters');
-      final chaptersSnapshot = await chaptersRef.get();
-      
-      // Batch delete all chapters
-      final batch = _firestore.batch();
-      for (var doc in chaptersSnapshot.docs) {
-        batch.delete(doc.reference);
-      }
-      await batch.commit();
-      
-      // Delete the book cover from storage
+      final bookRef = _firestore.collection('books').doc(bookId);
+    
+      await bookRef.update({
+        'isDeleted': true,
+        'deletedAt': FieldValue.serverTimestamp(),
+      });
+
+      // 4. Delete storage cover
       try {
         await _storage.ref('book_covers/$bookId').delete();
       } catch (e) {
-        // Ignore if the cover doesn't exist
+        // Ignore if file doesn't exist
       }
       
-      // Delete the book document
-      await _booksCollection.doc(bookId).delete();
     } catch (e) {
       throw Exception('Failed to delete book: $e');
     }
@@ -544,6 +542,7 @@ class BookService {
           .doc(bookId)
           .set({
             'savedAt': FieldValue.serverTimestamp(),
+            'bookId': bookId,
           });
       
       // Increment the saves count on the book

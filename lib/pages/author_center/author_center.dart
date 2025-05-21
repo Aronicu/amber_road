@@ -124,6 +124,7 @@ class AuthorCenterContent extends StatelessWidget {
                   stream: FirebaseFirestore.instance
                       .collection('books')
                       .where(FieldPath.documentId, whereIn: bookIds)
+                      .where('isDeleted', isEqualTo: false)
                       .snapshots(),
                   builder: (context, booksSnapshot) {
                     // ... existing book processing logic
