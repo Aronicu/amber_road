@@ -47,14 +47,6 @@ class _LibraryPageState extends State<LibraryPage> with SingleTickerProviderStat
                 fontWeight: FontWeight.bold,
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search, color: colPrimary),
-                onPressed: () {
-                  // Search functionality would go here
-                },
-              ),
-            ],
           ),
           body: _buildBookGrid(books),
         );

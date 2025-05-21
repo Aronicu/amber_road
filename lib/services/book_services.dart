@@ -370,84 +370,93 @@ class BookService {
   // Search books by title or author
   Future<List<Book>> searchBooks(String query, {int limit = 20}) async {
     try {
-      // Firebase doesn't support direct text search, so we'll use a basic startsWith query
-      final querySnapshot = await _booksCollection
-          .where('isPublic', isEqualTo: true)
-          .where('titleLower', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('titleLower', isLessThanOrEqualTo: '${query.toLowerCase()}\uf8ff')
-          .limit(limit)
-          .get();
-          
-      List<Book> books = [];
-      for (var doc in querySnapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final coverUrl = data['coverUrl'] as String?;
-        
-        if (coverUrl != null) {
-          final coverImage = await _getCoverImageFromUrl(coverUrl);
-          books.add(Book(
-            coverImage,
-            doc.id,
-            name: data['name'] ?? 'Untitled',
-            author: data['authorName'] ?? 'Unknown',
-            artist: data['artistName'] ?? 'Unknown',
-            description: data['description'] ?? 'No description',
-            genres: List<String>.from(data['genres'] ?? []),
-            themes: List<String>.from(data['themes'] ?? []),
-            format: _parseBookFormat(data['format']),
-            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-            saves: (data['saves'] as num?)?.toInt() ?? 0,
-            chapterCount: (data['chaptersCount'] as num?)?.toInt() ?? 0,
-            isPublic: data['isPublic'] ?? false,
-            views: data['views']?.toString(),
-            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
-          ));
-        }
-      }
+      if (query.isEmpty) return [];
+
+      // Normalize query for case-insensitive search
+      final normalizedQuery = query.trim();
       
-      // Also search by author name
-      final authorQuerySnapshot = await _booksCollection
-          .where('isPublic', isEqualTo: true)
-          .where('authorNameLower', isGreaterThanOrEqualTo: query.toLowerCase())
-          .where('authorNameLower', isLessThanOrEqualTo: '${query.toLowerCase()}\uf8ff')
-          .limit(limit)
-          .get();
-          
-      for (var doc in authorQuerySnapshot.docs) {
-        // Skip if we already added this book
-        if (books.any((book) => book.id == doc.id)) {
-          continue;
-        }
-        
-        final data = doc.data() as Map<String, dynamic>;
-        final coverUrl = data['coverUrl'] as String?;
-        
-        if (coverUrl != null) {
-          final coverImage = await _getCoverImageFromUrl(coverUrl);
-          books.add(Book(
-            coverImage,
-            doc.id,
-            name: data['name'] ?? 'Untitled',
-            author: data['authorName'] ?? 'Unknown',
-            artist: data['artistName'] ?? 'Unknown',
-            description: data['description'] ?? 'No description',
-            genres: List<String>.from(data['genres'] ?? []),
-            themes: List<String>.from(data['themes'] ?? []),
-            format: _parseBookFormat(data['format']),
-            rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-            saves: (data['saves'] as num?)?.toInt() ?? 0,
-            chapterCount: (data['chaptersCount'] as num?)?.toInt() ?? 0,
-            isPublic: data['isPublic'] ?? false,
-            views: data['views']?.toString(),
-            pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
-          ));
-        }
-      }
+      // Combined results from both name and author searches
+      final results = await Future.wait([
+        _searchByField('name', normalizedQuery, limit: limit),
+        _searchByField('authorName', normalizedQuery, limit: limit),
+      ]);
+
+      // Merge results and remove duplicates
+      final uniqueBooks = _mergeResults(results[0], results[1], limit);
       
-      return books;
+      return uniqueBooks;
+    } on FirebaseException catch (e) {
+      throw Exception('Firestore error: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to search books: $e');
+      throw Exception('Search failed: $e');
     }
+  }
+
+  Future<List<Book>> _searchByField(
+    String fieldName, 
+    String query, 
+    {int limit = 20}
+  ) async {
+    final querySnapshot = await _booksCollection
+        .where('isPublic', isEqualTo: true)
+        .where('isDeleted', isEqualTo: false)
+        .where(fieldName, isGreaterThanOrEqualTo: query)
+        .where(fieldName, isLessThanOrEqualTo: '$query\uf8ff')
+        .limit(limit)
+        .get();
+
+    return _convertDocsToBooks(querySnapshot.docs);
+  }
+
+  List<Book> _mergeResults(List<Book> list1, List<Book> list2, int limit) {
+    final allBooks = [...list1, ...list2];
+    final uniqueBooks = <String, Book>{};
+    
+    for (final book in allBooks) {
+      if (!uniqueBooks.containsKey(book.id)) {
+        uniqueBooks[book.id] = book;
+        if (uniqueBooks.length >= limit) break;
+      }
+    }
+    
+    return uniqueBooks.values.toList();
+  }
+
+  Future<List<Book>> _convertDocsToBooks(List<QueryDocumentSnapshot> docs) async {
+    final books = <Book>[];
+    
+    for (final doc in docs) {
+      try {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverUrl = data['coverUrl'] as String?;
+        
+        if (coverUrl == null || coverUrl.isEmpty) continue;
+        
+        final book = Book(
+          Image.network(coverUrl),
+          doc.id,
+          name: data['name']?.toString().trim() ?? 'Untitled',
+          author: data['authorName']?.toString().trim() ?? 'Unknown Author',
+          artist: data['artistName']?.toString().trim() ?? 'Unknown Artist',
+          description: data['description']?.toString().trim() ?? 'No description available',
+          genres: List<String>.from(data['genres'] ?? []),
+          themes: List<String>.from(data['themes'] ?? []),
+          format: _parseBookFormat(data['format']),
+          rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+          saves: (data['saves'] as num?)?.toInt() ?? 0,
+          chapterCount: (data['chaptersCount'] as num?)?.toInt() ?? 0,
+          isPublic: data['isPublic'] ?? false,
+          views: data['views']?.toString(),
+          pricePerChapter: (data['pricePerChapter'] as num?)?.toDouble() ?? 0.0,
+        );
+        
+        books.add(book);
+      } catch (e) {
+        print('Error converting document ${doc.id}: $e');
+      }
+    }
+    
+    return books;
   }
 
   // Get books by genre
