@@ -3,6 +3,8 @@ import 'package:amber_road/models/book.dart';
 import 'package:amber_road/models/chapter.dart';
 import 'package:amber_road/services/book_services.dart';
 import 'package:amber_road/services/chapter_service.dart';
+import 'package:amber_road/services/purchase_service.dart'; // Import the PurchaseService
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,11 +25,31 @@ class _BookDetailsState extends State<BookDetailsPage> {
   bool _isDetailsExpanded = false;
   // State for library status
   bool _isInLibrary = false;
+  // User coin balance
+  int _userCoins = 0;
+  // Create instance of PurchaseService
+  final PurchaseService _purchaseService = PurchaseService();
 
   @override
   void initState() {
     super.initState();
     _checkIfBookIsSaved();
+    _loadUserCoins();
+  }
+
+  // Load the user's current coin balance
+  Future<void> _loadUserCoins() async {
+    try {
+      final coins = await _purchaseService.getUserCoins();
+      if (mounted) {
+        setState(() {
+          _userCoins = coins;
+        });
+      }
+    } catch (e) {
+      // Handle error (could display a snackbar)
+      debugPrint('Error loading user coins: $e');
+    }
   }
 
   // Show a success snackbar
@@ -48,6 +70,21 @@ class _BookDetailsState extends State<BookDetailsPage> {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
           },
         ),
+      ),
+    );
+  }
+
+  // Show purchase result snackbar
+  void _showPurchaseResult(bool success, {String? message}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message ?? (success ? 'Chapter purchased successfully' : 'Purchase failed'),
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: success ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -91,6 +128,29 @@ class _BookDetailsState extends State<BookDetailsPage> {
                 ),
               ),
               actions: [
+                // Display user's coin balance
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Center(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.monetization_on,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          '$_userCoins',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 // Add to Library button
                 IconButton(
                   icon: Icon(
@@ -131,7 +191,6 @@ class _BookDetailsState extends State<BookDetailsPage> {
                       }
 
                       final chapters = snapshot.data!;
-                      // I HATE this with a Passion
                       return _buildChapters(chapters, book, context);
                     },
                   ),
@@ -336,7 +395,6 @@ class _BookDetailsState extends State<BookDetailsPage> {
 
   Widget _buildDetailSection(BuildContext context, Book book) {
     return Container(
-      // color: backgroundColor,
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,13 +549,36 @@ class _BookDetailsState extends State<BookDetailsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              'Chapters',
-              style: TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Chapters',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                // Display user's coin balance in the chapter section
+                Row(
+                  children: [
+                    Icon(
+                      Icons.monetization_on,
+                      color: Colors.amber,
+                      size: 16,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '$_userCoins coins',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           // Sort chapters in descending order (newest first)
@@ -505,7 +586,6 @@ class _BookDetailsState extends State<BookDetailsPage> {
         ],
       ),
     );
-    // return Center(child: Text("There are not Chapters Yet"),);
   }
 
   Widget _buildChapterItem(BuildContext context, Chapter chapter, Book book) {
@@ -526,72 +606,219 @@ class _BookDetailsState extends State<BookDetailsPage> {
       dateText = 'Feb 3, 2025';
     }
     
-    // Determine the icon based on chapter status
-    IconData statusIcon;
-    if (chapter.isFinished) {
-      statusIcon = Icons.check_circle;
-    } else if (chapter.isDownloaded) {
-      statusIcon = Icons.download_done;
-    } else if (chapter.isPurchased) {
-      statusIcon = Icons.lock_open;
-    } else {
-      statusIcon = Icons.play_circle_outline;
-    }
-    
-    return Column(
-      children: [
-        InkWell(
-          onTap: () {
-            final currentRoute = GoRouterState.of(context).matchedLocation;
-            // context.go('/book/${book.id}', extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
-            context.go('/book/${widget.bookId}/${chapter.id}', extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Chapter ${chapter.chapterNum}',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w500,
-                          color: textColor,
+    // Determine if chapter is locked (needs purchase)
+    return FutureBuilder<bool>(
+      future: _purchaseService.canUserAccessChapter(
+        bookId: widget.bookId,
+        chapterId: chapter.id,
+      ),
+      builder: (context, snapshot) {
+        bool canAccess = snapshot.data ?? false;
+        
+        // Determine the icon based on chapter access status
+        IconData statusIcon;
+        Color iconColor;
+        
+        if (chapter.isFinished) {
+          statusIcon = Icons.check_circle;
+          iconColor = Colors.green;
+        } else if (canAccess) {
+          if (chapter.isDownloaded) {
+            statusIcon = Icons.download_done;
+            iconColor = darkMode ? Colors.blue[300]! : Colors.blue;
+          } else {
+            statusIcon = Icons.lock_open;
+            iconColor = darkMode ? Colors.grey[400]! : Colors.grey[700]!;
+          }
+        } else {
+          statusIcon = Icons.lock;
+          iconColor = darkMode ? Colors.amber[300]! : Colors.amber;
+        }
+        
+        return Column(
+          children: [
+            InkWell(
+              onTap: () async {
+                // If user can access, navigate to chapter page
+                if (canAccess) {
+                  final currentRoute = GoRouterState.of(context).matchedLocation;
+                  context.go('/book/${widget.bookId}/${chapter.id}', 
+                      extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
+                } else {
+                  // Check if chapter requires purchase
+                  final chapterDoc = await _firestore()
+                      .collection('books')
+                      .doc(widget.bookId)
+                      .collection('chapters')
+                      .doc(chapter.id)
+                      .get();
+                      
+                  if (!chapterDoc.exists) {
+                    _showPurchaseResult(false, message: 'Chapter not found');
+                    return;
+                  }
+                  
+                  // Show purchase dialog
+                  _showPurchaseDialog(context, chapter, book, book.pricePerChapter.toInt());
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Chapter ${chapter.chapterNum}',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                            ),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            dateText,
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Show price badge if locked
+                    if (!canAccess && !chapter.isFinished)
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        margin: EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.monetization_on,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            SizedBox(width: 2),
+                            Text(
+                              '${book.pricePerChapter}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 4.0),
-                      Text(
-                        dateText,
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          color: subtitleColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                    Icon(
+                      statusIcon,
+                      color: iconColor,
+                      size: 24.0,
+                    ),
+                  ],
                 ),
-                Icon(
-                  statusIcon,
-                  color: chapter.isFinished 
-                      ? Colors.green
-                      : (darkMode ? Colors.grey[400] : Colors.grey[700]),
-                  size: 24.0,
-                ),
-              ],
+              ),
             ),
+            Divider(
+              height: 1.0,
+              thickness: 1.0,
+              color: dividerColor,
+              indent: 16.0,
+              endIndent: 16.0,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Helper method to get Firestore instance - mocking this for compilation
+  // In a real app, you would import this from your Firebase setup
+  dynamic _firestore() {
+    return FirebaseFirestore.instance; // This should come from your imports
+  }
+
+  void _showPurchaseDialog(BuildContext context, Chapter chapter, Book book, int price) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Purchase Chapter'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Do you want to purchase Chapter ${chapter.chapterNum}?'),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.monetization_on, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Text(
+                    '$price coins',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Your balance: $_userCoins coins',
+                style: TextStyle(color: _userCoins >= price ? Colors.green : Colors.red),
+              ),
+            ],
           ),
-        ),
-        Divider(
-          height: 1.0,
-          thickness: 1.0,
-          color: dividerColor,
-          indent: 16.0,
-          endIndent: 16.0,
-        ),
-      ],
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: _userCoins < price
+                  ? null // Disable the button if not enough coins
+                  : () async {
+                      Navigator.of(context).pop();
+                      // Attempt to purchase the chapter
+                      try {
+                        final success = await _purchaseService.purchaseChapter(
+                          bookId: widget.bookId,
+                          chapterId: chapter.id,
+                          price: price,
+                        );
+                        
+                        if (success) {
+                          // Reload user's coin balance
+                          await _loadUserCoins();
+                          _showPurchaseResult(true);
+                          
+                          // Navigate to the chapter
+                          final currentRoute = GoRouterState.of(context).matchedLocation;
+                          context.go('/book/${widget.bookId}/${chapter.id}', 
+                              extra: {'fromRoute': currentRoute, 'bookFormat': book.format});
+                        } else {
+                          _showPurchaseResult(false, message: 'Not enough coins');
+                        }
+                      } catch (e) {
+                        _showPurchaseResult(false, message: 'Error: ${e.toString()}');
+                      }
+                    },
+              child: Text('Purchase'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -613,14 +840,5 @@ class _BookDetailsState extends State<BookDetailsPage> {
         _isInLibrary = isSaved;
       });
     }
-  }
-}
-
-// Add this extension method if you don't have it already
-extension SortedList<T> on List<T> {
-  List<T> sorted(int Function(T a, T b) compare) {
-    final List<T> copy = List.from(this);
-    copy.sort(compare);
-    return copy;
   }
 }
