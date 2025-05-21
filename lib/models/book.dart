@@ -66,3 +66,17 @@ class Book {
   int chapterCount;
   double pricePerChapter;
 }
+
+class BookUpdate {
+  final Book book;
+  final String chapter;
+  final DateTime timestamp;
+  final bool isRead;
+
+  BookUpdate({
+    required this.book,
+    required this.chapter,
+    required this.timestamp,
+    this.isRead = false,
+  });
+}

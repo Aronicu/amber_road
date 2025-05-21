@@ -1,6 +1,9 @@
+import 'package:amber_road/services/book_services.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:amber_road/models/book.dart';
-import 'package:amber_road/constants/book_prototype.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class UpdatePage extends StatefulWidget {
   const UpdatePage({super.key});
@@ -10,6 +13,15 @@ class UpdatePage extends StatefulWidget {
 }
 
 class _UpdatePageState extends State<UpdatePage> {
+  late Future<List<BookUpdate>> _updatesFuture;
+  final BookService _bookService = BookService();
+
+  @override
+  void initState() {
+    super.initState();
+    _updatesFuture = _bookService.getRecentUpdates();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,10 +35,6 @@ class _UpdatePageState extends State<UpdatePage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {},
           ),
@@ -35,92 +43,25 @@ class _UpdatePageState extends State<UpdatePage> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: ListView(
-        children: [
-          _buildUpdatesSection('Today', [
-            BookUpdate(
-              book: theNovelsExtra,
-              chapter: 'Chapter 2.1',
-              isRead: true,
-            ),
-            BookUpdate(
-              book: myOlderSistersFriend,
-              chapter: 'Chapter 2.1',
-              isRead: true,
-            ),
-            BookUpdate(
-              book: brainrotGF,
-              chapter: 'Ch. 55 - We made a promise. Did...',
-              isDownloading: true,
-            ),
-          ]),
-          _buildUpdatesSection('Yesterday', [
-            BookUpdate(
-              book: myOlderSistersFriend,
-              chapter: 'Chapter 2.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: windBreaker,
-              chapter: 'Chapter 36.1',
-              isDownloading: true,
-            ),
-          ]),
-          _buildUpdatesSection('3 days ago', [
-            BookUpdate(
-              book: theNovelsExtra,
-              chapter: 'Chapter 2.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: brainrotGF,
-              chapter: 'Ch. 55 - We made a promise. Did...',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: windBreaker,
-              chapter: 'Chapter 36.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: theNovelsExtra,
-              chapter: 'Chapter 2.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: brainrotGF,
-              chapter: 'Ch. 55 - We made a promise. Did...',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: windBreaker,
-              chapter: 'Chapter 36.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: theNovelsExtra,
-              chapter: 'Chapter 2.1',
-              isDownloading: true,
-            ),
-          ]),
-          _buildUpdatesSection('1 week ago', [
-            BookUpdate(
-              book: brainrotGF,
-              chapter: 'Ch. 55 - We made a promise. Did...',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: theNovelsExtra,
-              chapter: 'Chapter 2.1',
-              isDownloading: true,
-            ),
-            BookUpdate(
-              book: windBreaker,
-              chapter: 'Chapter 36.1',
-              isDownloading: true,
-            ),
-          ]),
-        ],
+      body: FutureBuilder<List<BookUpdate>>(
+        future: _updatesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Center(child: Text('Error loading updates'));
+          }
+          
+          final groupedUpdates = _groupUpdates(snapshot.data!);
+          
+          return ListView(
+            children: groupedUpdates.entries.map((entry) {
+              return _buildUpdatesSection(entry.key, entry.value);
+            }).toList(),
+          );
+        },
       ),
     );
   }
@@ -144,6 +85,27 @@ class _UpdatePageState extends State<UpdatePage> {
     );
   }
 
+  // Add this helper method to group updates by relative date
+  Map<String, List<BookUpdate>> _groupUpdates(List<BookUpdate> updates) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    return groupBy(updates, (update) {
+      final date = DateTime(
+        update.timestamp.year,
+        update.timestamp.month,
+        update.timestamp.day,
+      );
+      
+      final difference = today.difference(date).inDays;
+      
+      if (difference == 0) return 'Today';
+      if (difference == 1) return 'Yesterday';
+      if (difference <= 7) return '$difference days ago';
+      return 'Older';
+    });
+  }
+
   Widget _buildUpdateItemTile(BookUpdate update) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -164,36 +126,24 @@ class _UpdatePageState extends State<UpdatePage> {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        update.chapter,
-        style: TextStyle(
-          color: update.isRead ? Colors.grey : Colors.grey[400],
-          fontSize: 13,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(update.chapter),
+          Text(
+            DateFormat('MMM dd, yyyy - hh:mm a').format(update.timestamp),
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
+        ],
       ),
       trailing: update.isRead 
           ? const Icon(Icons.check_circle, color: Colors.green)
-          : const Icon(Icons.download, color: Colors.white),
+          : null,
       onTap: () {
+        final currentRoute = GoRouterState.of(context).matchedLocation;
+        context.go('/book/${update.book.id}', extra: currentRoute);
         // Handle tap - open chapter
       },
     );
   }
-}
-
-// Model for book updates
-class BookUpdate {
-  final Book book;
-  final String chapter;
-  final bool isRead;
-  final bool isDownloading;
-
-  BookUpdate({
-    required this.book,
-    required this.chapter,
-    this.isRead = false,
-    this.isDownloading = false,
-  });
 }

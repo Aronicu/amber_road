@@ -649,4 +649,76 @@ class BookService {
       // Silently fail view counting to not disrupt user experience
     }
   }
+
+  /// Creates an update entry when a new chapter is published
+  Future<void> createChapterUpdate({
+    required String bookId,
+    required String chapterTitle,
+  }) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('User not authenticated');
+      
+      // Get book details
+      final bookDoc = await _booksCollection.doc(bookId).get();
+      if (!bookDoc.exists) throw Exception('Book not found');
+      
+      final bookData = bookDoc.data() as Map<String, dynamic>;
+      
+      // Create update document
+      await _firestore.collection('updates').add({
+        'bookId': bookId,
+        'bookTitle': bookData['name'],
+        'chapterTitle': chapterTitle,
+        'authorName': bookData['authorName'],
+        'coverUrl': bookData['coverUrl'],
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      
+      // Also update book's updatedAt field
+      await _booksCollection.doc(bookId).update({
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error creating chapter update: $e');
+      throw Exception('Failed to create chapter update');
+    }
+  }
+
+  /// Gets recent updates grouped by date
+  Future<List<BookUpdate>> getRecentUpdates() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('updates')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      final List<BookUpdate> updates = [];
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final coverImage = await _getCoverImageFromUrl(data['coverUrl']);
+        
+        updates.add(BookUpdate(
+          book: Book(
+            coverImage,
+            data['bookId'],
+            name: data['bookTitle'],
+            author: data['authorName'],
+            artist: data['authorName'],
+            description: '',
+            genres: [],
+            themes: [],
+            format: BookFormat.manga,
+            isPublic: true,
+          ),
+          chapter: data['chapterTitle'],
+          timestamp: (data['timestamp'] as Timestamp).toDate(),
+        ));
+      }
+      return updates;
+    } catch (e) {
+      print('Error fetching updates: $e');
+      return [];
+    }
+  }
 }

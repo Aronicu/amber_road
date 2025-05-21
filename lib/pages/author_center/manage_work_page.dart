@@ -467,6 +467,13 @@ class _BookManagementState extends State<BookManagementPage> {
         bookId: widget.bookId,
         chapterId: chapterId,
       );
+
+      final chapter = (await ChapterService().getChapter(bookId: widget.bookId, chapterId: chapterId))!;
+
+      await BookService().createChapterUpdate(
+        bookId: widget.bookId,
+        chapterTitle: chapter.title,
+      );
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
