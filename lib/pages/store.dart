@@ -41,13 +41,7 @@ class StorePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                final currentRoute = GoRouterState.of(context).matchedLocation;
-                context.go('/book/${makeine.id}', extra: currentRoute);
-              },
-              child: _buildCycle()
-            ),
+            _buildCycle(),
             SizedBox(height: 15),
 
             _latestUpdates(),
@@ -77,7 +71,7 @@ class StorePage extends StatelessWidget {
 
         final books = snapshot.data!;
         return CyclingPopularTitle(
-          books: books
+            books: books
         );
       }
     );
